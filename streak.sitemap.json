@@ -1,0 +1,20 @@
+[
+  {
+    "url": "/",
+    "renderConfig": {
+      "renderId": "homeRenderId",
+      "metadata": {},
+      "dataHandler": "HomeDataHandler",
+      "rootLayout": "MainLayout",
+      "widgets": [
+        { "id": "PageHead",      "type": "PageHead"      },
+        { "id": "HelloNav",      "type": "HelloNav"      },
+        { "id": "HelloBanner",   "type": "HelloBanner"   },
+        { "id": "HelloFeatures", "type": "HelloFeatures", "loadingStrategy": "lazy" },
+        { "id": "HelloMessage",  "type": "HelloMessage",  "loadingStrategy": "lazy" },
+        { "id": "HelloFooter",   "type": "HelloFooter",   "loadingStrategy": "lazy" }
+      ],
+      "version": "1.0.0"
+    }
+  }
+]
