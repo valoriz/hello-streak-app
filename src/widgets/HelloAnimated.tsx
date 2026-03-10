@@ -1,359 +1,376 @@
 import { Script } from "streak/components";
 
-// ─── How loadPackage works internally ─────────────────────────────────────────
-//
-//  gDom.loadPackage("js/motion.js")
-//
-//  1. Streak's asset-worker-handler (injected into every page) creates a
-//     dedicated Web Worker (asset-worker.js) on the first call.
-//
-//  2. The handler sends { type: "LOAD_ASSET", assetId: "js/motion.js" }
-//     to the worker via postMessage().
-//
-//  3. The Web Worker (running off the main thread) fetches the file:
-//         fetch("/assets/js/motion.js")
-//     → maps to public/js/motion.js in the dev server / build output.
-//
-//  4. The worker posts the file content back to the main thread.
-//
-//  5. The handler injects a <script> tag into <head> with that content,
-//     so the library's global (e.g. window.Motion) becomes available.
-//
-//  6. The Promise returned by loadPackage resolves — you can now use the lib.
-//
-//  You access the loaded library via: (gDom as any).LibraryGlobalName
-//  e.g.  const { animate, inView } = (gDom as any).Motion;
-//
-// ─── Separate user-created Web Worker (Blob pattern) ─────────────────────────
-//
-//  For CPU-intensive work (computing particle positions, path math, etc.)
-//  you can spin up your own Web Worker inline using a Blob URL — no
-//  separate worker file needed.
-//
-//      const blob = new Blob([`self.onmessage = ...`], { type: "application/javascript" });
-//      const url  = URL.createObjectURL(blob);
-//      const worker = new Worker(url);
-//      worker.postMessage({ ... });
-//      worker.onmessage = (e) => { /* use result */ URL.revokeObjectURL(url); worker.terminate(); };
-//
-// ─────────────────────────────────────────────────────────────────────────────
-
-type Stat = {
-  id: string;
-  value: number;
-  label: string;
-  suffix?: string;
-};
+type Card = { id: string; icon: string; title: string; description: string };
 
 type HelloAnimatedProps = {
   data?: {
-    heading?: string;
-    subheading?: string;
-    stats?: Stat[];
-    particleCount?: number;
+    words?: string[];
+    cards?: Card[];
     animationDuration?: number;
   };
 };
 
 const HelloAnimated = (props: HelloAnimatedProps) => {
-  const heading = props?.data?.heading ?? "Animated with Motion.js";
-  const subheading = props?.data?.subheading ?? "Loaded off-thread via Streak's asset worker";
-  const stats = props?.data?.stats ?? [];
-  const particleCount = props?.data?.particleCount ?? 50;
-  const animationDuration = props?.data?.animationDuration ?? 0.7;
+  const words = props?.data?.words ?? ["Fast", "Beautiful", "Powerful", "Static"];
+  const cards = props?.data?.cards ?? [];
+  const animationDuration = props?.data?.animationDuration ?? 0.65;
 
   return (
     <section
       id="hello-animated"
-      className="relative py-28 px-6 overflow-hidden"
-      style={{ background: "#f8fafc" }}
+      className="relative py-32 px-6 overflow-hidden"
+      style={{ background: "#09090b" }}
     >
-      {/* Canvas sits behind content — particles drawn here by the user Worker */}
-      <canvas
-        id="particle-canvas"
+      {/* ── Scroll progress bar — fixed at page top, width driven by Motion.scroll ── */}
+      <div
+        id="scroll-bar"
         aria-hidden="true"
-        className="absolute inset-0 w-full h-full pointer-events-none"
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: "3px",
+          background: "linear-gradient(90deg, #818cf8, #a78bfa, #ec4899)",
+          transformOrigin: "0% 50%",
+          transform: "scaleX(0)",
+          zIndex: 9999,
+        }}
       />
 
-      <div className="relative z-10 max-w-6xl mx-auto">
-        {/* Section header */}
-        <div id="animated-header" className="text-center mb-16" style={{ opacity: 0 }}>
-          <span className="inline-block mb-3 px-3 py-1 text-xs font-semibold tracking-widest uppercase rounded-full bg-indigo-100 text-indigo-600">
-            Motion.js + Web Worker
+      {/* ── Background orbs — drift lazily toward the cursor via Motion ── */}
+      <div
+        id="orb-1"
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          width: "700px",
+          height: "700px",
+          borderRadius: "50%",
+          background:
+            "radial-gradient(circle, rgba(99,102,241,0.28) 0%, transparent 70%)",
+          top: "-200px",
+          left: "-200px",
+          filter: "blur(90px)",
+          pointerEvents: "none",
+        }}
+      />
+      <div
+        id="orb-2"
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          width: "600px",
+          height: "600px",
+          borderRadius: "50%",
+          background:
+            "radial-gradient(circle, rgba(167,139,250,0.22) 0%, transparent 70%)",
+          bottom: "-180px",
+          right: "-180px",
+          filter: "blur(80px)",
+          pointerEvents: "none",
+        }}
+      />
+
+      <div className="relative z-10 max-w-5xl mx-auto">
+
+        {/* ── Morphing headline ── */}
+        <div
+          id="animated-header"
+          className="text-center mb-20"
+          style={{ opacity: 0, transform: "translateY(-30px)" }}
+        >
+          <span className="inline-block mb-4 px-3 py-1 text-xs font-semibold tracking-widest uppercase rounded-full border border-indigo-500/30 text-indigo-400">
+            Motion.js · loaded via Streak's asset worker
           </span>
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mt-3 mb-4">
-            {heading}
+          <h2 className="mt-4 text-5xl md:text-7xl font-extrabold text-white tracking-tight leading-none">
+            Build something
           </h2>
-          <p className="text-gray-500 max-w-xl mx-auto text-base">{subheading}</p>
+          {/* This word morphs via animate().finished promise chain */}
+          <h2
+            id="morph-word"
+            className="text-5xl md:text-7xl font-extrabold tracking-tight leading-none mt-1"
+            style={{
+              background: "linear-gradient(135deg, #818cf8 0%, #a78bfa 50%, #ec4899 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+            }}
+          >
+            {words[0]}
+          </h2>
+          <p className="mt-6 text-gray-500 max-w-md mx-auto text-base leading-relaxed">
+            Every API demonstrated live on this page — no fake demos.
+          </p>
         </div>
 
-        {/* Stat cards — start invisible, animated in by Motion.inView */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {stats.map((stat, i) => (
+        {/* ── 3D tilt cards — parent needs perspective for rotateX/Y to show ── */}
+        <div
+          id="cards-grid"
+          className="grid md:grid-cols-3 gap-5"
+          style={{ perspective: "1200px" }}
+        >
+          {cards.map((card) => (
             <div
-              key={stat.id}
-              className="stat-card p-6 bg-white rounded-2xl shadow-sm border border-gray-100 text-center"
-              data-target={stat.value}
-              data-index={i}
-              style={{ opacity: 0, transform: "translateY(30px)" }}
+              key={card.id}
+              className="tilt-card relative p-8 rounded-2xl"
+              style={{
+                opacity: 0,
+                background: "rgba(255,255,255,0.04)",
+                border: "1px solid rgba(255,255,255,0.07)",
+                backdropFilter: "blur(16px)",
+                transformStyle: "preserve-3d",
+                cursor: "default",
+              }}
             >
+              {/*
+                Radial glow follows cursor inside the card.
+                --mx and --my CSS vars are set on mousemove via JS.
+              */}
               <div
-                className="stat-number text-5xl font-extrabold text-indigo-600 tabular-nums"
-                data-value={stat.value}
-              >
-                0
+                className="card-glow absolute inset-0 rounded-2xl pointer-events-none"
+                style={{
+                  opacity: 0,
+                  background:
+                    "radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(129,140,248,0.18) 0%, transparent 65%)",
+                  transition: "opacity 0.2s",
+                }}
+              />
+              <div className="relative">
+                <span
+                  className="text-4xl mb-5 block"
+                  style={{ filter: "drop-shadow(0 0 12px rgba(129,140,248,0.6))" }}
+                >
+                  {card.icon}
+                </span>
+                <h3 className="text-lg font-bold text-white mb-2">{card.title}</h3>
+                <p className="text-sm text-gray-400 leading-relaxed">{card.description}</p>
               </div>
-              {stat.suffix && (
-                <span className="text-2xl font-bold text-indigo-400">{stat.suffix}</span>
-              )}
-              <p className="mt-2 text-sm text-gray-500 font-medium">{stat.label}</p>
             </div>
           ))}
         </div>
 
-        {/* Source callout */}
-        <p className="mt-10 text-center text-xs text-gray-400">
-          Cards animate via{" "}
-          <code className="bg-gray-100 px-1 py-0.5 rounded text-indigo-500">
-            Motion.inView
-          </code>{" "}
-          · particles computed in a{" "}
-          <code className="bg-gray-100 px-1 py-0.5 rounded text-indigo-500">
-            new Worker(blobUrl)
-          </code>
-        </p>
+        {/* ── Magnetic button — larger zone so cursor attracts from afar ── */}
+        <div
+          id="magnetic-zone"
+          className="flex justify-center"
+          style={{ marginTop: "4rem", padding: "3rem" }}
+        >
+          <a
+            id="magnetic-btn"
+            href="#"
+            className="inline-flex items-center gap-3 px-8 py-4 rounded-full text-white font-semibold text-base"
+            style={{
+              background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+              boxShadow: "0 0 48px rgba(99,102,241,0.35)",
+              display: "inline-flex",
+            }}
+          >
+            <span>Explore Streak.js</span>
+            <span
+              id="btn-arrow"
+              aria-hidden="true"
+              style={{ display: "inline-block" }}
+            >
+              →
+            </span>
+          </a>
+        </div>
+
       </div>
 
       {/*
-        Script wires up:
-          A. gDom.loadPackage  → Streak asset-worker fetches motion.js off-thread
-          B. Blob Worker       → computes particle positions on a separate thread
-          C. Motion.inView     → triggers stat card animations on scroll
-          D. Count-up          → increments displayed numbers to their target values
+        ── Script: all Motion.js animations wired up here ──────────────────────
+
+        gDom.loadPackage("js/motion.js")
+          → Streak's internal asset-worker fetches /assets/js/motion.js off-thread
+          → injects it as a <script> tag into <head>
+          → Promise resolves, window.Motion is now available as gDom.Motion
+
+        File lives at:  public/assets/js/motion.js
+        Download with:  bun run setup:packages
       */}
       <Script
         id="hello-animated-script"
-        options={{ particleCount, animationDuration }}
+        options={{ animationDuration, words }}
       >
         {(gDom: any, options: any) => {
-
-          // ── A. Load motion.js via Streak's built-in asset worker ────────────
-          //
-          // loadPackage(path) sends a message to Streak's asset-worker.js,
-          // which fetches /assets/<path> on a separate thread, then posts
-          // the file content back. The handler injects it as a <script> tag
-          // so the library global (window.Motion) becomes available.
-          //
-          // Path resolves to: public/js/motion.js  (run: bun run setup:packages)
           gDom
             .loadPackage("js/motion.js")
             .then(() => {
-              // After the Promise resolves, the library's global is on gDom (= window)
-              const { animate, inView } = (gDom as any).Motion;
+              const { animate, scroll, inView, stagger, spring } = (gDom as any).Motion;
 
-              // Animate the section header
-              const header = document.getElementById("animated-header");
-              if (header) {
-                animate(
-                  header,
-                  { opacity: [0, 1], transform: ["translateY(-20px)", "translateY(0)"] },
-                  { duration: options.animationDuration, easing: "ease-out" }
-                );
-              }
+              // ── 1. Scroll progress bar ───────────────────────────────────
+              // scroll(callback) fires on every scroll event.
+              // duration: 0 makes it perfectly scroll-linked (no lag).
+              scroll(({ y }: { y: { progress: number } }) => {
+                animate("#scroll-bar", { scaleX: y.progress }, { duration: 0 });
+              });
 
-              // ── C. Motion.inView — trigger card animations when visible ───
-              //
-              // inView(element, onEnter, options?)
-              //   element  – selector or HTMLElement to observe
-              //   onEnter  – ({ target }) => void  called when element enters viewport
-              //   options  – { margin: "..." }  shrink/expand the trigger zone
-              //
-              // Returns a cleanup function to stop observing.
+              // ── 2. Section header entrance ──────────────────────────────
+              animate(
+                "#animated-header",
+                { opacity: [0, 1], y: [-30, 0] },
+                { duration: options.animationDuration, easing: "ease-out" }
+              );
+
+              // ── 3. Morphing headline ─────────────────────────────────────
+              // animate() returns an object with a `.finished` Promise.
+              // Chain .finished calls to sequence animations without nesting.
+              const morphEl = document.getElementById("morph-word");
+              const words: string[] = options.words ?? [];
+              let wordIndex = 0;
+
+              const morphNext = () => {
+                wordIndex = (wordIndex + 1) % words.length;
+
+                // Step A: slide current word up and fade out
+                animate(morphEl, { opacity: 0, y: -20 }, {
+                  duration: 0.22,
+                  easing: "ease-in",
+                })
+                  .finished
+                  .then(() => {
+                    // Step B: swap the text content
+                    if (morphEl) morphEl.textContent = words[wordIndex] ?? "";
+
+                    // Step C: spring the new word in from below
+                    return animate(morphEl, { opacity: 1, y: 0 }, {
+                      duration: 0.55,
+                      easing: spring({ stiffness: 180, damping: 16, restSpeed: 0.5 }),
+                    }).finished;
+                  })
+                  .then(() => {
+                    // Step D: wait, then repeat
+                    setTimeout(morphNext, 2200);
+                  });
+              };
+
+              if (morphEl && words.length > 1) setTimeout(morphNext, 2200);
+
+              // ── 4. Staggered card entrance with spring ───────────────────
+              // inView fires once when the element enters the viewport.
+              // stagger(0.12) adds 0 / 0.12 / 0.24s delays across the 3 cards.
+              // spring easing gives a natural overshoot — feels physical.
               inView(
-                "#hello-animated",
+                "#cards-grid",
                 () => {
-                  const cards = document.querySelectorAll<HTMLElement>(".stat-card");
+                  animate(
+                    ".tilt-card",
+                    { opacity: [0, 1], y: [70, 0], scale: [0.86, 1] },
+                    {
+                      delay: stagger(0.13),
+                      duration: 0.9,
+                      easing: spring({ stiffness: 110, damping: 13, restSpeed: 0.5 }),
+                    }
+                  );
+                },
+                { margin: "-40px 0px" }
+              );
 
-                  cards.forEach((card, i) => {
-                    // ── Motion.animate ──────────────────────────────────────
-                    // animate(element, keyframes, options)
-                    //   element   – DOM element or selector
-                    //   keyframes – { prop: [from, to] } or { prop: to }
-                    //   options   – { duration, delay, easing }
-                    animate(
-                      card,
-                      {
-                        opacity: [0, 1],
-                        transform: ["translateY(30px)", "translateY(0)"],
-                      },
-                      {
-                        duration: options.animationDuration,
-                        delay: i * 0.12,
-                        easing: [0.25, 0.1, 0.25, 1], // cubic-bezier
-                      }
-                    );
+              // ── 5. 3D perspective tilt on hover ─────────────────────────
+              // rotateX/rotateY require the parent to have perspective set.
+              // The grid parent has perspective: 1200px in JSX.
+              // spring on mouseleave snaps back with a satisfying overshoot.
+              const tiltCards = document.querySelectorAll<HTMLElement>(".tilt-card");
+
+              tiltCards.forEach((card) => {
+                card.addEventListener("mousemove", (e: MouseEvent) => {
+                  const r = card.getBoundingClientRect();
+                  const x = (e.clientX - r.left)  / r.width  - 0.5; // -0.5 to +0.5
+                  const y = (e.clientY - r.top)   / r.height - 0.5;
+
+                  animate(card, {
+                    rotateX: -y * 22,  // tilt up/down
+                    rotateY:  x * 22,  // tilt left/right
+                    scale: 1.05,
+                  }, { duration: 0.12, easing: "linear" });
+
+                  // Move the inner glow spotlight to cursor position
+                  const glow = card.querySelector<HTMLElement>(".card-glow");
+                  if (glow) {
+                    const mx = ((e.clientX - r.left) / r.width)  * 100;
+                    const my = ((e.clientY - r.top)  / r.height) * 100;
+                    glow.style.setProperty("--mx", `${mx}%`);
+                    glow.style.setProperty("--my", `${my}%`);
+                    animate(glow, { opacity: 1 }, { duration: 0.15 });
+                  }
+                });
+
+                card.addEventListener("mouseleave", () => {
+                  animate(card, {
+                    rotateX: 0,
+                    rotateY: 0,
+                    scale: 1,
+                  }, {
+                    duration: 0.8,
+                    easing: spring({ stiffness: 75, damping: 11, restSpeed: 0.5 }),
                   });
 
-                  // ── D. Count-up numbers after cards are visible ──────────
-                  setTimeout(() => {
-                    cards.forEach((card) => {
-                      const display = card.querySelector<HTMLElement>(".stat-number");
-                      const target = parseInt(card.dataset["target"] ?? "0", 10);
-                      if (!display || !target) return;
+                  const glow = card.querySelector<HTMLElement>(".card-glow");
+                  if (glow) animate(glow, { opacity: 0 }, { duration: 0.3 });
+                });
+              });
 
-                      const duration = 1400;
-                      const start = performance.now();
+              // ── 6. Magnetic button ──────────────────────────────────────
+              // The magnetic zone (padding: 3rem around the button) is the
+              // invisible hit area. Mouse entering it pulls the button.
+              // Strength: 35% of cursor offset. Springs back on leave.
+              const zone  = document.getElementById("magnetic-zone");
+              const btn   = document.getElementById("magnetic-btn");
+              const arrow = document.getElementById("btn-arrow");
 
-                      const tick = (now: number) => {
-                        const elapsed = now - start;
-                        const progress = Math.min(elapsed / duration, 1);
-                        // ease-out cubic
-                        const eased = 1 - Math.pow(1 - progress, 3);
-                        display.textContent = Math.round(eased * target).toLocaleString();
-                        if (progress < 1) requestAnimationFrame(tick);
-                      };
+              if (zone && btn) {
+                zone.addEventListener("mousemove", (e: MouseEvent) => {
+                  const r  = zone.getBoundingClientRect();
+                  const dx = (e.clientX - (r.left + r.width  / 2)) * 0.35;
+                  const dy = (e.clientY - (r.top  + r.height / 2)) * 0.35;
 
-                      requestAnimationFrame(tick);
-                    });
-                  }, 300);
-                },
-                { margin: "-80px 0px" } // trigger 80px before element enters viewport
-              );
-            })
-            .catch((err: unknown) => {
-              console.error("[HelloAnimated] Failed to load motion.js:", err);
-            });
+                  animate(btn,  { x: dx, y: dy },         { duration: 0.22, easing: "ease-out" });
+                  if (arrow) animate(arrow, { x: dx * 0.4 }, { duration: 0.22 });
+                }, { passive: true });
 
-          // ── B. User-created Blob Worker — particle positions ─────────────
-          //
-          // This is a completely separate Web Worker from Streak's asset-worker.
-          // We embed the worker source as a string and create it via Blob URL,
-          // so no separate worker file is needed.
-          //
-          // The worker runs on a separate thread: heavy math won't block
-          // the main thread or jank the page animations.
-          const workerSource = `
-            self.onmessage = function (e) {
-              var count  = e.data.count;
-              var width  = e.data.width;
-              var height = e.data.height;
-
-              var particles = [];
-              for (var i = 0; i < count; i++) {
-                particles.push({
-                  x:       Math.random() * width,
-                  y:       Math.random() * height,
-                  radius:  1.5 + Math.random() * 3,
-                  speedX:  (Math.random() - 0.5) * 0.4,
-                  speedY:  (Math.random() - 0.5) * 0.4,
-                  opacity: 0.15 + Math.random() * 0.35,
-                  phase:   Math.random() * Math.PI * 2,
+                zone.addEventListener("mouseleave", () => {
+                  animate(btn,  { x: 0, y: 0 }, {
+                    duration: 0.9,
+                    easing: spring({ stiffness: 75, damping: 11, restSpeed: 0.5 }),
+                  });
+                  if (arrow) animate(arrow, { x: 0 }, {
+                    duration: 0.7,
+                    easing: spring({ stiffness: 100, damping: 14 }),
+                  });
                 });
               }
 
-              // Post initial positions back to main thread
-              self.postMessage({ type: "INIT", particles: particles });
+              // ── 7. Background orbs drift toward cursor ──────────────────
+              // Long duration + ease-out = slow, lazy drift. The two orbs
+              // move in opposite directions so they cross as the cursor moves.
+              const orb1 = document.getElementById("orb-1");
+              const orb2 = document.getElementById("orb-2");
 
-              // Worker stays alive — main thread can send "TICK" to request
-              // updated positions each frame (demonstrating ongoing communication)
-              self.onmessage = function (msg) {
-                if (msg.data.type !== "TICK") return;
-                var t = msg.data.t;
-                for (var i = 0; i < particles.length; i++) {
-                  var p = particles[i];
-                  p.x += p.speedX;
-                  p.y += p.speedY + Math.sin(t * 0.001 + p.phase) * 0.3;
-                  if (p.x < 0)      p.x = msg.data.width;
-                  if (p.x > msg.data.width)  p.x = 0;
-                  if (p.y < 0)      p.y = msg.data.height;
-                  if (p.y > msg.data.height) p.y = 0;
+              document.addEventListener("mousemove", (e: MouseEvent) => {
+                const nx = e.clientX / window.innerWidth;   // 0 → 1
+                const ny = e.clientY / window.innerHeight;  // 0 → 1
+
+                if (orb1) {
+                  animate(orb1,
+                    { x: nx * 130 - 65, y: ny * 90 - 45 },
+                    { duration: 2.8, easing: "ease-out" }
+                  );
                 }
-                self.postMessage({ type: "POSITIONS", particles: particles });
-              };
-            };
-          `;
-
-          // Create Blob URL — no separate file needed
-          const blob = new Blob([workerSource], { type: "application/javascript" });
-          const workerUrl = URL.createObjectURL(blob);
-          const worker = new Worker(workerUrl);
-
-          const canvas = document.getElementById("particle-canvas") as HTMLCanvasElement | null;
-          const section = document.getElementById("hello-animated");
-
-          if (!canvas || !section) {
-            worker.terminate();
-            URL.revokeObjectURL(workerUrl);
-            return;
-          }
-
-          const resize = () => {
-            canvas.width = section.offsetWidth;
-            canvas.height = section.offsetHeight;
-          };
-          resize();
-          window.addEventListener("resize", resize, { passive: true });
-
-          const ctx = canvas.getContext("2d");
-
-          // Send init message to worker
-          worker.postMessage({
-            type: "INIT",
-            count: options.particleCount,
-            width: canvas.width,
-            height: canvas.height,
-          });
-
-          let rafId: number;
-
-          // Worker responds with initial positions, then we start the render loop
-          worker.onmessage = (e: MessageEvent) => {
-            if (e.data.type === "INIT") {
-              // Render loop on main thread — only drawing, no computation
-              const draw = () => {
-                if (!ctx) return;
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-                const particles = e.data.particles as Array<{
-                  x: number;
-                  y: number;
-                  radius: number;
-                  opacity: number;
-                }>;
-
-                for (const p of particles) {
-                  ctx.beginPath();
-                  ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-                  ctx.fillStyle = `rgba(99, 102, 241, ${p.opacity})`;
-                  ctx.fill();
+                if (orb2) {
+                  animate(orb2,
+                    { x: -(nx * 110 - 55), y: -(ny * 70 - 35) },
+                    { duration: 3.5, easing: "ease-out" }
+                  );
                 }
+              }, { passive: true });
 
-                // Ask worker to compute next frame positions (off-thread)
-                worker.postMessage({
-                  type: "TICK",
-                  t: performance.now(),
-                  width: canvas.width,
-                  height: canvas.height,
-                });
-
-                rafId = requestAnimationFrame(draw);
-              };
-
-              draw();
-            }
-
-            if (e.data.type === "POSITIONS") {
-              // Updated positions arrive — next draw() call will use them
-              // (the closure over e.data.particles updates automatically)
-            }
-          };
-
-          // Cleanup when page unloads
-          window.addEventListener("unload", () => {
-            cancelAnimationFrame(rafId);
-            worker.terminate();
-            URL.revokeObjectURL(workerUrl);
-          });
+            })
+            .catch((err: unknown) => {
+              console.error("[HelloAnimated] motion.js failed to load:", err);
+              console.info("Run: bun run setup:packages");
+            });
         }}
       </Script>
     </section>

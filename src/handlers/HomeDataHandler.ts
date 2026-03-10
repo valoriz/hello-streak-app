@@ -65,15 +65,31 @@ const getHomeData = async () => {
     },
 
     HelloAnimated: {
-      heading: "Animated with Motion.js",
-      subheading: "Loaded off-thread via Streak's asset worker · particles computed in a Blob Worker",
-      particleCount: 50,
       animationDuration: 0.65,
-      stats: [
-        { id: "s1", value: 0,   label: "Runtime JS shipped",  suffix: "kb" },
-        { id: "s2", value: 100, label: "Static HTML output",  suffix: "%" },
-        { id: "s3", value: 60,  label: "Frames per second",   suffix: "" },
-        { id: "s4", value: 1,   label: "Build step to deploy", suffix: "" },
+      // Words cycle in the morphing headline — swap out for any list
+      words: ["Fast", "Beautiful", "Powerful", "Reliable"],
+      cards: [
+        {
+          id: "c1",
+          icon: "⚡",
+          title: "Zero Runtime",
+          description:
+            "Pages are pre-rendered at build time. No framework ships to the browser — just lean, fast HTML.",
+        },
+        {
+          id: "c2",
+          icon: "🧩",
+          title: "Widget System",
+          description:
+            "Assemble pages from independent React widgets. Each widget owns its markup, styles, and Scripts.",
+        },
+        {
+          id: "c3",
+          icon: "✨",
+          title: "Script & Dynamic",
+          description:
+            "Drop in client interactivity with Script. Defer heavy content with Dynamic — loaded on demand.",
+        },
       ],
     },
 
