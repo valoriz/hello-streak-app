@@ -115,6 +115,40 @@ describe("HomeDataHandler — HelloFeatures", () => {
   });
 });
 
+// ─── HelloAnimated ───────────────────────────────────────────────────────────
+describe("HomeDataHandler — HelloAnimated", () => {
+  test("has a heading", () => {
+    expect(data.HelloAnimated.heading).toBeTruthy();
+  });
+
+  test("particleCount is a positive integer", () => {
+    expect(data.HelloAnimated.particleCount).toBeGreaterThan(0);
+    expect(Number.isInteger(data.HelloAnimated.particleCount)).toBe(true);
+  });
+
+  test("animationDuration is between 0 and 5 seconds", () => {
+    expect(data.HelloAnimated.animationDuration).toBeGreaterThan(0);
+    expect(data.HelloAnimated.animationDuration).toBeLessThanOrEqual(5);
+  });
+
+  test("has at least one stat", () => {
+    expect(data.HelloAnimated.stats.length).toBeGreaterThan(0);
+  });
+
+  test("every stat has id, value (number), and label", () => {
+    for (const stat of data.HelloAnimated.stats) {
+      expect(stat.id).toBeTruthy();
+      expect(typeof stat.value).toBe("number");
+      expect(stat.label).toBeTruthy();
+    }
+  });
+
+  test("stat ids are unique", () => {
+    const ids = data.HelloAnimated.stats.map((s) => s.id);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+});
+
 // ─── HelloMessage ─────────────────────────────────────────────────────────────
 describe("HomeDataHandler — HelloMessage", () => {
   test("has a quote string", () => {

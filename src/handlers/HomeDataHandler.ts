@@ -64,6 +64,19 @@ const getHomeData = async () => {
       ],
     },
 
+    HelloAnimated: {
+      heading: "Animated with Motion.js",
+      subheading: "Loaded off-thread via Streak's asset worker · particles computed in a Blob Worker",
+      particleCount: 50,
+      animationDuration: 0.65,
+      stats: [
+        { id: "s1", value: 0,   label: "Runtime JS shipped",  suffix: "kb" },
+        { id: "s2", value: 100, label: "Static HTML output",  suffix: "%" },
+        { id: "s3", value: 60,  label: "Frames per second",   suffix: "" },
+        { id: "s4", value: 1,   label: "Build step to deploy", suffix: "" },
+      ],
+    },
+
     HelloMessage: {
       quote:
         "Streak.js is the missing link between a React component tree and a genuinely static website.",

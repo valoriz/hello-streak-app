@@ -16,8 +16,9 @@ const MainLayout = () => {
       <body className="bg-white text-gray-900 antialiased">
         <WidgetPlaceholder id="HelloNav"      type="HelloNav"      />
         <WidgetPlaceholder id="HelloBanner"   type="HelloBanner"   />
-        <WidgetPlaceholder id="HelloFeatures" type="HelloFeatures" />
-        <WidgetPlaceholder id="HelloMessage"  type="HelloMessage"  />
+        <WidgetPlaceholder id="HelloFeatures"  type="HelloFeatures"  />
+        <WidgetPlaceholder id="HelloAnimated"  type="HelloAnimated"  />
+        <WidgetPlaceholder id="HelloMessage"   type="HelloMessage"   />
         <WidgetPlaceholder id="HelloFooter"   type="HelloFooter"   />
       </body>
     </html>
