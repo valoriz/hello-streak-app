@@ -187,8 +187,7 @@ const HelloAnimated = (props: HelloAnimatedProps) => {
           → injects it as a <script> tag into <head>
           → Promise resolves, window.Motion is now available as gDom.Motion
 
-        File lives at:  public/assets/js/motion.js
-        Download with:  bun run setup:packages
+        File lives at:  public/assets/js/motion.js  (committed to the repo)
       */}
       <Script
         id="hello-animated-script"
@@ -201,11 +200,10 @@ const HelloAnimated = (props: HelloAnimatedProps) => {
               const { animate, scroll, inView, stagger, spring } = (gDom as any).Motion;
 
               // ── 1. Scroll progress bar ───────────────────────────────────
-              // scroll(callback) fires on every scroll event.
-              // duration: 0 makes it perfectly scroll-linked (no lag).
-              scroll(({ y }: { y: { progress: number } }) => {
-                animate("#scroll-bar", { scaleX: y.progress }, { duration: 0 });
-              });
+              // scroll(animation) links an existing animation's progress
+              // directly to the page scroll position — no callback needed.
+              // The bar goes from scaleX:0 to scaleX:1 as the page scrolls.
+              scroll(animate("#scroll-bar", { scaleX: [0, 1] }));
 
               // ── 2. Section header entrance ──────────────────────────────
               animate(
@@ -264,8 +262,7 @@ const HelloAnimated = (props: HelloAnimatedProps) => {
                       easing: spring({ stiffness: 110, damping: 13, restSpeed: 0.5 }),
                     }
                   );
-                },
-                { margin: "-40px 0px" }
+                }
               );
 
               // ── 5. 3D perspective tilt on hover ─────────────────────────
@@ -369,7 +366,7 @@ const HelloAnimated = (props: HelloAnimatedProps) => {
             })
             .catch((err: unknown) => {
               console.error("[HelloAnimated] motion.js failed to load:", err);
-              console.info("Run: bun run setup:packages");
+              console.info("Ensure public/assets/js/motion.js exists in the repo.");
             });
         }}
       </Script>

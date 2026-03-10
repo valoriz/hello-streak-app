@@ -10,7 +10,6 @@ const getHomeData = async () => {
     PageHead: {
       title: "Hello Streak — Minimal Starter",
       description: "A minimal Hello World app built with Streak.js — the static site generator for React.",
-      heroImageUrl: "/images/hero.webp",
     },
 
     HelloNav: {
