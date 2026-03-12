@@ -1,6 +1,7 @@
 {
   "name": "hello-streak-app",
   "version": "1.0.0",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "start": "python3 -m http.server 8000 --directory out",
@@ -13,7 +14,8 @@
     "test:watch": "bun test --watch",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "validate": "bun run src/scripts/streak-validate.ts"
   },
   "dependencies": {
     "streak": "file:../streak/streak-forge-2.0.36.tgz"
