@@ -18,7 +18,7 @@
     "validate": "bun run src/scripts/streak-validate.ts"
   },
   "dependencies": {
-    "streak": "file:../streak/streak-forge-2.0.36.tgz"
+    "streak": "file:./streak-forge-2.0.36.tgz"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^8.0.0",
