@@ -1,6 +1,6 @@
 # hello-streak-app
 
-A reference "Hello World" application built with **[Streak.js](https://github.com/streakjs)** (`streak-forge`) — a React-based static site generator that pre-renders every page to plain HTML at build time. No React, no framework JS ships to the browser by default.
+A reference "Hello World" application built with **Streak.js** (`streak-forge`) — a static site generator that pre-renders every page to plain HTML at build time. No framework JS ships to the browser by default.
 
 ---
 
@@ -20,7 +20,7 @@ A reference "Hello World" application built with **[Streak.js](https://github.co
 
 | Tool | Version |
 |---|---|
-| [Bun](https://bun.sh) | ≥ 1.2 |
+| Bun | ≥ 1.2 |
 | Node.js | ≥ 20 (for ESLint) |
 | Python 3 | any (for `bun run start`) |
 
@@ -35,7 +35,7 @@ bun install
 # 2. Start development (Tailwind watch + streak-forge dev server, runs in parallel)
 bun run dev
 
-# 3. Open http://localhost:3000 (or whatever port streak-forge dev uses)
+# 3. Open the local dev server URL printed by streak-forge
 ```
 
 ---
@@ -144,7 +144,7 @@ Checks performed:
 | 3 | `loadingStrategy` values are valid (`"lazy"` only) |
 | 4 | Every sitemap widget has a matching `WidgetPlaceholder` in its layout |
 | 5 | Handler files have `export default` and return `status: 200` |
-| 6 | Widget files have `export default`; warns on unsafe `props.data.` access and React hook usage |
+| 6 | Widget files have `export default`; warns on unsafe `props.data.` access and hook usage |
 | 7 | Local asset paths referenced in handlers exist in `public/` |
 
 ### Custom ESLint rules (`eslint.config.js`)
@@ -162,7 +162,7 @@ Checks performed:
 
 ### Script — passing data to the browser
 
-The `Script` component's child function is serialized via `.toString()` and executed as an IIFE. It cannot close over React-scope variables. Use `options` to pass server-derived values:
+The `Script` component's child function is serialized via `.toString()` and executed as an IIFE. It cannot close over component-scope variables. Use `options` to pass server-derived values:
 
 ```tsx
 // Wrong — `color` is undefined after serialization
@@ -226,13 +226,13 @@ Test files live in `src/tests/`. The pattern is to test handler data shape and i
 
 ## Tech stack
 
-- **[Streak.js / streak-forge](https://github.com/streakjs)** — static site generator
-- **[Bun](https://bun.sh)** — runtime, package manager, test runner
-- **[TailwindCSS v3](https://tailwindcss.com)** — utility-first CSS
-- **[TypeScript](https://www.typescriptlang.org)** — strict mode
-- **[ESLint 9](https://eslint.org)** — flat config with inline Streak plugin
-- **[Motion.js](https://motion.dev)** — animation library (loaded via Web Worker)
-- **[concurrently](https://github.com/open-cli-tools/concurrently)** — parallel dev scripts
+- **Streak.js / streak-forge** — static site generator
+- **Bun** — runtime, package manager, test runner
+- **TailwindCSS v3** — utility-first CSS
+- **TypeScript** — strict mode
+- **ESLint 9** — flat config with inline Streak plugin
+- **Motion.js** — animation library (loaded via Web Worker)
+- **concurrently** — parallel dev scripts
 
 ---
 
