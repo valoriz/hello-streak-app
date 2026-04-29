@@ -4,7 +4,7 @@
     "": {
       "name": "hello-streak-app",
       "dependencies": {
-        "streak": "file:./streak-forge-2.0.36.tgz",
+        "streak": "file:./streak-forge-2.1.6.tgz",
       },
       "devDependencies": {
         "@typescript-eslint/eslint-plugin": "^8.0.0",
@@ -652,7 +652,7 @@
 
     "source-map-support": ["source-map-support@0.5.21", "", { "dependencies": { "buffer-from": "^1.0.0", "source-map": "^0.6.0" } }, "sha512-uBHU3L3czsIyYXKX88fdrGovxdSCoTGDRZ6SYXtSRxLZUzHg5P/66Ht6uoUlHu9EZod+inXhKo3qQgwXUT/y1w=="],
 
-    "streak": ["streak-forge@./streak-forge-2.0.36.tgz", { "dependencies": { "@clack/prompts": "^0.11.0", "@fullhuman/postcss-purgecss": "^7.0.2", "@tailwindcss/postcss": "^4.1.11", "bun": "^1.2.21", "cssnano": "^7.1.0", "dotenv": "^17.2.2", "esbuild": "^0.27.0", "node-html-parser": "^7.0.1", "nodemon": "^3.1.10", "postcss": "^8.5.6", "postcss-nesting": "^13.0.2", "react": "^19.1.1", "react-dom": "^19.1.1", "tailwindcss": "^3.4.17", "tailwindcss4": "npm:tailwindcss@^4.1.18", "terser": "^5.43.1" }, "peerDependencies": { "@types/react": "^19.1.12", "@types/react-dom": "^19.1.9", "autoprefixer": "^10.4.21", "cssnano": "^7.1.0", "postcss": "^8.4.47", "typescript": "^5" }, "bin": { "streak-forge": "./dist/cli/main.js" } }],
+    "streak": ["streak-forge@./streak-forge-2.1.6.tgz", { "dependencies": { "@clack/prompts": "^0.11.0", "@fullhuman/postcss-purgecss": "^7.0.2", "@tailwindcss/postcss": "^4.1.11", "bun": "^1.2.21", "cssnano": "^7.1.0", "dotenv": "^17.2.2", "esbuild": "^0.27.0", "node-html-parser": "^7.0.1", "nodemon": "^3.1.10", "postcss": "^8.5.6", "postcss-nesting": "^13.0.2", "react": "^19.1.1", "react-dom": "^19.1.1", "tailwindcss": "^3.4.17", "tailwindcss4": "npm:tailwindcss@^4.1.18", "terser": "^5.43.1" }, "peerDependencies": { "@types/react": "^19.1.12", "@types/react-dom": "^19.1.9", "autoprefixer": "^10.4.21", "cssnano": "^7.1.0", "postcss": "^8.4.47", "typescript": "^5" }, "bin": { "streak-forge": "./dist/cli/main.js" } }],
 
     "string-width": ["string-width@4.2.3", "", { "dependencies": { "emoji-regex": "^8.0.0", "is-fullwidth-code-point": "^3.0.0", "strip-ansi": "^6.0.1" } }, "sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g=="],
 
