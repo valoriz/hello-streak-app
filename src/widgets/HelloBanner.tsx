@@ -1,4 +1,4 @@
-import { Preload, Script } from "streak/components";
+import { Preload, Script } from "streak-forge/components";
 
 type HelloBannerProps = {
   data?: {

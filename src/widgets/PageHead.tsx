@@ -1,4 +1,4 @@
-import { Preload } from "streak/components";
+import { Preload } from "streak-forge/components";
 
 type PageHeadProps = {
   data?: {

@@ -1,4 +1,4 @@
-import { Dynamic, Script } from "streak/components";
+import { Dynamic, Script } from "streak-forge/components";
 
 type HelloMessageProps = {
   data?: {

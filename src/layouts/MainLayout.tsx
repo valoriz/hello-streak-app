@@ -1,4 +1,4 @@
-import { WidgetPlaceholder } from "streak/components";
+import { WidgetPlaceholder } from "streak-forge/components";
 
 // ─── WidgetPlaceholder ────────────────────────────────────────────────────────
 // Marks a slot in the layout where a widget is injected at build time.
