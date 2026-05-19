@@ -35,3 +35,7 @@ bun-debug.log*
 
 # Type check cache
 tsconfig.tsbuildinfo
+
+
+# Prebuild output
+.prebuild/
