@@ -8,11 +8,11 @@ A reference "Hello World" application built with **Streak.js** (`streak-forge`) 
 
 | Feature | Widget |
 |---|---|
-| `Preload` — resource hinting | `PageHead`, `HelloBanner` |
-| `Script` — client interactivity via serialized IIFE | `HelloNav`, `HelloBanner` |
+| `Preload` — resource hinting | `HelloBanner` (hero image only — `tailwind.css` is a small render-blocking stylesheet the browser already discovers immediately, so it isn't preloaded) |
+| `Script` — client interactivity via serialized IIFE | `HelloNav`, `HelloBanner`, `HelloTerminal` |
 | `Dynamic` — deferred DOM injection on demand | `HelloFeatures`, `HelloMessage` |
 | `loadPackage` — third-party JS via Web Worker | `HelloAnimated` (Motion.js) |
-| `loadingStrategy: "lazy"` — deferred widget JS | `HelloFeatures`, `HelloAnimated`, `HelloMessage`, `HelloFooter` |
+| `loadingStrategy: "lazy"` — deferred widget JS | `HelloFeatures`, `HelloTerminal`, `HelloAnimated`, `HelloMessage`, `HelloFooter` |
 
 ---
 
@@ -52,7 +52,7 @@ bun run css-dev       # Tailwind CSS watch only
 bun run build         # compile CSS + streak-forge pre-build  →  out/
 
 # Preview the build
-bun run start         # serve out/ on http://localhost:8000
+bun run start         # serve on http://localhost:8000 with real Cache-Control (see below)
 
 # Quality checks  (run all three before every build)
 bun run validate      # structural: sitemap ↔ file system consistency
@@ -79,32 +79,41 @@ hello-streak-app/
 │
 ├── src/
 │   ├── handlers/
-│   │   └── HomeDataHandler.ts   # async data provider for the home page
+│   │   ├── HomeDataHandler.ts   # async data provider — shared by "/", "/docs", "/about"
+│   │   ├── CommonHandler.ts     # once-per-build shared data (branding, nav links)
+│   │   └── Middleware.ts        # route resolution hook ("/dynamic/test" -> "/" demo)
 │   ├── layouts/
 │   │   └── MainLayout.tsx       # full <html> layout with WidgetPlaceholder slots
 │   ├── widgets/
-│   │   ├── PageHead.tsx         # <head> content + Preload hints
-│   │   ├── HelloNav.tsx         # navigation bar (Script for mobile menu)
-│   │   ├── HelloBanner.tsx      # hero section (Preload + Script)
+│   │   ├── PageHead.tsx         # <head> content — title, meta, stylesheet link
+│   │   ├── HelloNav.tsx         # navigation bar (Script for mobile menu + streak badge)
+│   │   ├── HelloBanner.tsx      # hero section (Preload of the hero image + Script)
 │   │   ├── HelloFeatures.tsx    # feature cards (Dynamic + Script)
+│   │   ├── HelloTerminal.tsx    # typewriter build-pipeline demo (Script)
 │   │   ├── HelloAnimated.tsx    # Motion.js animations (loadPackage)
 │   │   ├── HelloMessage.tsx     # testimonial / quote (Dynamic + Script)
 │   │   └── HelloFooter.tsx      # site footer
 │   ├── scripts/
-│   │   └── streak-validate.ts   # structural validator (bun run validate)
+│   │   ├── streak-validate.ts   # structural validator (bun run validate)
+│   │   └── test-render.ts       # exercises the render() API directly (bun run test-render)
 │   ├── common/styles/
 │   │   └── input.css            # Tailwind entry point
 │   └── tests/
 │       ├── HomeDataHandler.test.ts
+│       ├── CommonHandler.test.ts
+│       ├── Middleware.test.ts
+│       ├── streakComponents.test.ts   # Script "options" bridge coverage
 │       └── widgets.test.ts
 │
 ├── public/
 │   ├── images/streak-logo.svg
 │   └── assets/js/motion.js      # Motion.js — committed, loaded via Web Worker
 │
+├── server.py                    # local preview server with real Cache-Control (see below)
+│
 └── out/                         # build output (gitignored)
-    └── homeRenderId/
-        └── index.html
+    └── <version>/
+        └── raw-content.json
 ```
 
 ---
@@ -124,6 +133,81 @@ streak.sitemap.json
 ```
 
 **Build output:** `out/homeRenderId/index.html` — a complete, self-contained static HTML file. Nothing renders at runtime; the browser receives finished HTML.
+
+---
+
+## Local preview & caching
+
+`bun run start` runs `server.py` — a small stdlib-only (`http.server`) preview
+server that stands in for `python3 -m http.server` with real Cache-Control
+headers, ETag-based conditional GET (`304`), and gzip. It serves `public/` at
+`/` (the app's real, referenced-today assets), falling back to `out/` for
+anything else.
+
+Nothing here is content-hashed (no `?v=` query strings, no per-build path
+segments), so every rule below is a deliberate tradeoff between "cache for
+real speed" and "don't serve something stale for too long":
+
+| Path | Cache-Control | Why |
+|---|---|---|
+| Images / fonts (`.svg .png .jpg .webp .ico .woff` …) | `public, max-age=86400` | Filename-stable, not content-hashed — a bounded (1 day) staleness window, with ETag as insurance if the content changes within it. |
+| `/assets/js/*.js` (e.g. `motion.js`, loaded via `gDom.loadPackage`) | `public, max-age=86400` | Same reasoning as images — committed, not content-hashed. |
+| Anything served from `out/` | `no-cache` | Page content — always revalidate. |
+| Anything else | `no-cache` | Conservative default. |
+
+Each request logs a line showing `HIT (304)` (revalidated, no body sent) vs
+`MISS` (full transfer), with byte count and response time — so caching
+behavior is directly observable instead of guessed at from a browser's
+network panel:
+
+```
+[200] MISS       /images/streak-logo.svg  44005B  3.4ms
+[304] HIT (304)  /images/streak-logo.svg  0B  0.6ms
+```
+
+```bash
+python3 server.py           # default port 8000, serves public/ (+ out/ fallback)
+python3 server.py 8010      # custom port
+```
+
+### The general pattern, for when a build is versioned
+
+`server.py`'s rules above use bounded TTLs (1 day, or always-revalidate)
+because this app's own build doesn't content-hash or version any of its
+output paths today — the file on disk gets overwritten in place, so nothing
+guarantees a stale cached copy is actually wrong to keep serving.
+
+The moment a build *does* stamp a version into either the filename (a
+`?v=<version>` query string) or the path itself (`/<page>/<version>/…`), the
+correct policy for that file changes completely — instead of a bounded TTL,
+it can be cached **forever**, because a real change always produces a new
+URL rather than overwriting the old one. This is the general 3-group pattern
+used elsewhere in the Streak.js toolchain once output reaches that stage:
+
+| Group | Example | Versioned by | Cache-Control |
+|---|---|---|---|
+| 1. Fixed-path runtime files | a bundle referenced everywhere as `/app.js?v=<buildId>` | query string | `public, max-age=31536000, immutable` |
+| 2. Per-page content files | `/<page>/<contentVersion>/common.js` | directory path | `public, max-age=31536000, immutable` |
+| 3. Unversioned page entry points | `index.html`, `index.json` | not versioned — must revalidate | `no-cache` + `ETag`/`Last-Modified` |
+
+The rule for matching a request path against these, in order:
+
+1. Exact match against the known fixed-path runtime files → group 1's `immutable` rule.
+2. Path ends in a per-page content filename, or matches a per-page content
+   directory shape → group 2's `immutable` rule.
+3. Filename is exactly `index.html` or `index.json` → group 3's `no-cache` +
+   validator rule (without a validator, every request becomes a full
+   re-download — safe, but wasteful).
+4. Everything else (unversioned static assets, e.g. `public/` in this app
+   today) → a bounded TTL, tuned to how often that content actually changes.
+
+Groups 1 and 2 both resolve to `immutable` for the same underlying reason:
+once a real content change always produces a brand-new URL, there is no
+"stale" state left for a long `max-age` to cause — the old URL's content
+genuinely never changes again, so there's nothing to revalidate. Group 3 is
+the opposite case (fixed path, content *does* change) and must never get a
+long `max-age`, or a returning visitor keeps seeing pre-deploy content until
+it expires regardless of what the build actually produced.
 
 ---
 

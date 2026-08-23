@@ -15,12 +15,24 @@ const HelloMessage = (props: HelloMessageProps) => {
 
   return (
     <section
-      className="py-28 px-6"
+      id="hello-message"
+      className="relative py-28 px-6 overflow-hidden"
       style={{
         background: "linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%)",
       }}
     >
-      <div className="max-w-3xl mx-auto text-center">
+      {/* Cursor-follow glow — same technique as HelloBanner's #hero-cursor-glow */}
+      <div
+        id="message-cursor-glow"
+        aria-hidden="true"
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(500px circle at var(--mx, 50%) var(--my, 50%), rgba(167,139,250,0.12) 0%, transparent 60%)",
+        }}
+      />
+
+      <div className="relative max-w-3xl mx-auto text-center">
         {/* Quote mark */}
         <div
           className="text-8xl leading-none font-serif text-indigo-500 select-none mb-4"
@@ -69,6 +81,22 @@ const HelloMessage = (props: HelloMessageProps) => {
 
         <Script id="hello-message-script">
           {(gDom: any) => {
+            const section = document.getElementById("hello-message");
+            const glow = document.getElementById("message-cursor-glow");
+            if (section && glow) {
+              section.addEventListener(
+                "mousemove",
+                (e: MouseEvent) => {
+                  const r = section.getBoundingClientRect();
+                  const mx = ((e.clientX - r.left) / r.width) * 100;
+                  const my = ((e.clientY - r.top) / r.height) * 100;
+                  glow.style.setProperty("--mx", `${mx}%`);
+                  glow.style.setProperty("--my", `${my}%`);
+                },
+                { passive: true }
+              );
+            }
+
             const btn = document.getElementById("load-fact-btn");
             if (!btn) return;
 

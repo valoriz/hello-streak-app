@@ -4,7 +4,7 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "start": "python3 -m http.server 8000 --directory out",
+    "start": "python3 server.py",
     "css-build": "tailwindcss -i ./src/common/styles/input.css -o ./public/styles/tailwind.css",
     "css-dev": "tailwindcss -i ./src/common/styles/input.css -o ./public/styles/tailwind.css --watch",
     "dev:streak": "streak-forge dev",
@@ -15,7 +15,10 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc --noEmit",
-    "validate": "bun run src/scripts/streak-validate.ts"
+    "validate": "bun run src/scripts/streak-validate.ts",
+    "test-render": "bun run src/scripts/test-render.ts",
+    "d": "streak-forge build",
+    "e": "streak-forge dev-build"
   },
   "dependencies": {
     "streak-forge": "latest"

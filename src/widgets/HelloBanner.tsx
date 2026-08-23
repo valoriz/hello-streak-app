@@ -48,6 +48,21 @@ const HelloBanner = (props: HelloBannerProps) => {
         }}
       />
 
+      {/*
+        Cursor-follow glow — position driven by --mx/--my CSS vars, set on
+        mousemove in the Script below. Same technique as .card-glow in
+        HelloAnimated.tsx (radial gradient anchored to a CSS var position).
+      */}
+      <div
+        id="hero-cursor-glow"
+        aria-hidden="true"
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(600px circle at var(--mx, 50%) var(--my, 40%), rgba(129,140,248,0.14) 0%, transparent 60%)",
+        }}
+      />
+
       {/* Content */}
       <div className="relative z-10 max-w-3xl mx-auto">
         {/* Badge */}
@@ -124,6 +139,65 @@ const HelloBanner = (props: HelloBannerProps) => {
             cta.addEventListener("mouseleave", () => {
               cta.style.boxShadow = "none";
               cta.style.transform = "translateY(0)";
+            });
+          }
+
+          // Cursor-follow glow — updates --mx/--my consumed by #hero-cursor-glow
+          const glow = document.getElementById("hero-cursor-glow");
+          if (section && glow) {
+            section.addEventListener(
+              "mousemove",
+              (e: MouseEvent) => {
+                const r = section.getBoundingClientRect();
+                const mx = ((e.clientX - r.left) / r.width) * 100;
+                const my = ((e.clientY - r.top) / r.height) * 100;
+                glow.style.setProperty("--mx", `${mx}%`);
+                glow.style.setProperty("--my", `${my}%`);
+              },
+              { passive: true }
+            );
+          }
+
+          // Confetti burst on CTA click — native Web Animations API, no
+          // extra dependency (Motion.js is only loaded lazily, below the
+          // fold, for HelloAnimated — this stays decoupled from that).
+          if (cta) {
+            cta.addEventListener("click", () => {
+              const colors = [options.accentColor, "#ec4899", "#a78bfa", "#34d399", "#facc15"];
+              const rect = cta.getBoundingClientRect();
+              const originX = rect.left + rect.width / 2;
+              const originY = rect.top + rect.height / 2;
+
+              for (let i = 0; i < 16; i++) {
+                const piece = document.createElement("span");
+                piece.style.position = "fixed";
+                piece.style.left = `${originX}px`;
+                piece.style.top = `${originY}px`;
+                piece.style.width = "8px";
+                piece.style.height = "8px";
+                piece.style.borderRadius = i % 2 === 0 ? "9999px" : "2px";
+                piece.style.background = colors[i % colors.length] ?? "#818cf8";
+                piece.style.pointerEvents = "none";
+                piece.style.zIndex = "9999";
+                document.body.appendChild(piece);
+
+                const angle = (Math.PI * 2 * i) / 16 + Math.random() * 0.4;
+                const distance = 90 + Math.random() * 90;
+                const dx = Math.cos(angle) * distance;
+                const dy = Math.sin(angle) * distance - 40; // slight upward bias
+
+                const anim = piece.animate(
+                  [
+                    { transform: "translate(0, 0) rotate(0deg)", opacity: 1 },
+                    {
+                      transform: `translate(${dx}px, ${dy}px) rotate(${Math.random() * 360}deg)`,
+                      opacity: 0,
+                    },
+                  ],
+                  { duration: 700 + Math.random() * 300, easing: "cubic-bezier(0.16, 1, 0.3, 1)" }
+                );
+                anim.onfinish = () => piece.remove();
+              }
             });
           }
 

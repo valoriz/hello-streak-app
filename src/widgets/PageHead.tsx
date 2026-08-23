@@ -1,17 +1,13 @@
-import { Preload } from "streak-forge/components";
-
 type PageHeadProps = {
   data?: {
     title?: string;
     description?: string;
-    heroImageUrl?: string;
   };
 };
 
 const PageHead = (props: PageHeadProps) => {
   const title = props?.data?.title ?? "Hello Streak";
   const description = props?.data?.description ?? "A Streak.js app";
-  const heroImageUrl = props?.data?.heroImageUrl;
 
   return (
     <>
@@ -23,17 +19,12 @@ const PageHead = (props: PageHeadProps) => {
       <meta property="og:description" content={description} />
 
       {/*
-        Preload: emits <link rel="preload"> so the browser fetches this
-        resource before it is discovered in the HTML body.
-        href  = URL to preload
-        as    = resource type ("image" | "font" | "style" | "script" | "video")
-        media = media query scope - "" means all screens
+        No Preload here - tailwind.css is a small, render-blocking stylesheet
+        the browser already discovers immediately via the <link> below, so a
+        preload hint buys nothing. The one Preload this app uses (the hero
+        background image) lives in HelloBanner - the widget that actually
+        owns that image, not the shared page head.
       */}
-      <Preload href="/styles/tailwind.css" as="style" media="" />
-      {heroImageUrl && (
-        <Preload href={heroImageUrl} as="image" media="(min-width: 768px)" />
-      )}
-
       <link rel="stylesheet" href="/styles/tailwind.css" />
       <link rel="icon" href="/images/streak-logo.svg" type="image/svg+xml" />
     </>

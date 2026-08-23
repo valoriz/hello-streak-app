@@ -9,6 +9,14 @@
  */
 
 import { describe, test, expect } from "bun:test";
+import PageHead from "../widgets/PageHead";
+import HelloNav from "../widgets/HelloNav";
+import HelloBanner from "../widgets/HelloBanner";
+import HelloFeatures from "../widgets/HelloFeatures";
+import HelloTerminal from "../widgets/HelloTerminal";
+import HelloAnimated from "../widgets/HelloAnimated";
+import HelloMessage from "../widgets/HelloMessage";
+import HelloFooter from "../widgets/HelloFooter";
 
 // ─── Helpers extracted for testability ────────────────────────────────────────
 
@@ -132,4 +140,34 @@ describe("NavLink shape validation", () => {
   test("null fails", () => {
     expect(isValidNavLink(null)).toBe(false);
   });
+});
+
+// ─── Widget defaults / optional-chaining safety ───────────────────────────────
+// CLAUDE.md: "data is always optional — always use optional chaining." These
+// call every real widget with {} and { data: undefined } and assert none
+// throw, which is exactly what breaks if a widget regresses to unguarded
+// `props.data.field` access.
+describe("Widget defaults — every widget tolerates missing data", () => {
+  // Each widget has its own distinct `data` shape — `any` here is fine, the
+  // test only cares that calling with {} / undefined data never throws.
+  const widgets: Array<[string, (props: any) => unknown]> = [
+    ["PageHead", PageHead],
+    ["HelloNav", HelloNav],
+    ["HelloBanner", HelloBanner],
+    ["HelloFeatures", HelloFeatures],
+    ["HelloTerminal", HelloTerminal],
+    ["HelloAnimated", HelloAnimated],
+    ["HelloMessage", HelloMessage],
+    ["HelloFooter", HelloFooter],
+  ];
+
+  for (const [name, Widget] of widgets) {
+    test(`${name} does not throw with {} props`, () => {
+      expect(() => Widget({})).not.toThrow();
+    });
+
+    test(`${name} does not throw with { data: undefined }`, () => {
+      expect(() => Widget({ data: undefined })).not.toThrow();
+    });
+  }
 });
