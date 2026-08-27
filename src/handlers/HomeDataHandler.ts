@@ -3,33 +3,99 @@
 // sitemap. Streak passes { data: value } to the matching widget as props.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const getHomeData = async () => {
+const stall = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+interface CommonData {
+  branding?: { logoSrc?: string; logoAlt?: string; tagline?: string };
+  nav?: { links?: { label: string; href: string }[] };
+}
+
+// Per-page identity content, keyed by streak.sitemap.json's metadata.pageName
+// - the one piece of per-page context this handler receives but previously
+// ignored (every page rendered identical content regardless of which page
+// was building). Structural/demo content (HelloFeatures, HelloAnimated,
+// HelloTerminal, HelloFooter) stays shared across pages - only the
+// page-identity widgets vary.
+const PAGE_CONTENT = {
+  home: {
+    pageTitle: "Hello Streak — Minimal Starter",
+    pageDescription: "A minimal Hello World app built with Streak.js — the static site generator for React.",
+    heading: "Hello, World.",
+    subheading: "Build blazing-fast static sites with React components, zero runtime overhead.",
+    cta: { label: "Get Started", href: "#features" },
+    backgroundSeed: "streakjs-hero",
+    accentColor: "#818cf8",
+    quote: "Streak.js is the missing link between a React component tree and a genuinely static website.",
+    bonusFact:
+      "At build time Streak serialises your data handler output, renders every React widget to an HTML string, and stitches it all into a complete page — no hydration, no client bundle.",
+  },
+  docs: {
+    pageTitle: "Hello Streak — Docs",
+    pageDescription: "Preload, Script, Dynamic, loadPackage — every Streak.js primitive this app uses, explained.",
+    heading: "Read the docs.",
+    subheading: "Every widget on this site demonstrates a real Streak.js primitive — this page is the index.",
+    cta: { label: "Jump to concepts", href: "#features" },
+    backgroundSeed: "streakjs-hero-docs",
+    accentColor: "#34d399",
+    quote: "The best documentation is a real app you can read from top to bottom.",
+    bonusFact:
+      "Script's child function is serialised via .toString() and run as an IIFE - it can't close over widget-scope variables, so the options prop is the only bridge from server data into browser code.",
+  },
+  about: {
+    pageTitle: "Hello Streak — About",
+    pageDescription: "Why we built a zero-runtime static site generator.",
+    heading: "About Streak.js.",
+    subheading: "The missing link between a React component tree and a genuinely static website.",
+    cta: { label: "See how it's built", href: "#features" },
+    backgroundSeed: "streakjs-hero-about",
+    accentColor: "#f472b6",
+    quote: "We wanted React's ergonomics without shipping React to the browser.",
+    bonusFact:
+      "Every page in this app - home, docs, and this one - is pre-rendered once at build time. Nothing here re-renders in the browser.",
+  },
+} as const;
+
+type PageName = keyof typeof PAGE_CONTENT;
+
+const isPageName = (value: unknown): value is PageName =>
+  typeof value === "string" && value in PAGE_CONTENT;
+
+const getHomeData = async (metadata?: Record<string, unknown>, { common }: { common?: CommonData } = {}) => {
+  await stall(500); // Simulate delay
+
+  console.info("[HomeDataHandler] received metadata:", metadata);
+
+  const page = PAGE_CONTENT[isPageName(metadata?.pageName) ? metadata.pageName : "home"];
+
   return {
     status: 200,
 
     PageHead: {
-      title: "Hello Streak — Minimal Starter",
-      description: "A minimal Hello World app built with Streak.js — the static site generator for React.",
+      title: page.pageTitle,
+      description: page.pageDescription,
     },
 
     HelloNav: {
-      logoSrc: "/images/streak-logo.svg",
-      logoAlt: "Streak.js",
-      links: [
+      logoSrc: common?.branding?.logoSrc ?? "/images/streak-logo.svg",
+      logoAlt: common?.branding?.logoAlt ?? "Streak.js",
+      links: common?.nav?.links ?? [
         { label: "Home",   href: "/" },
-        { label: "Docs",   href: "#" },
+        { label: "Docs",   href: "/docs" },
+        { label: "About",  href: "/about" },
         { label: "GitHub", href: "#" },
       ],
+      // Playful nod to the project's own name — counts up on mount.
+      streakCount: 128,
     },
 
     HelloBanner: {
-      heading: "Hello, World.",
-      subheading: "Build blazing-fast static sites with React components, zero runtime overhead.",
-      cta: { label: "Get Started", href: "#features" },
+      heading: page.heading,
+      subheading: page.subheading,
+      cta: page.cta,
       // Free image from Picsum Photos — https://picsum.photos (no attribution required)
-      // Seeded URL so the image stays consistent across builds.
-      backgroundImage: "https://picsum.photos/seed/streakjs-hero/1600/900",
-      accentColor: "#818cf8",
+      // Seeded URL so the image stays consistent across builds, distinct per page.
+      backgroundImage: `https://picsum.photos/seed/${page.backgroundSeed}/1600/900`,
+      accentColor: page.accentColor,
       animationMs: 700,
     },
 
@@ -63,6 +129,21 @@ const getHomeData = async () => {
       ],
     },
 
+    HelloTerminal: {
+      promptLabel: "streak@forge",
+      typeSpeedMs: 22,
+      lines: [
+        "$ cat streak.sitemap.json",
+        "→ 3 pages · 8 widgets each",
+        "$ streak-forge build",
+        "✓ HomeDataHandler   → data",
+        "✓ MainLayout        → shell",
+        "✓ 8 widgets         → HTML strings",
+        "✓ out/1.0.0/raw-content.json ready",
+        "$ _",
+      ],
+    },
+
     HelloAnimated: {
       animationDuration: 0.65,
       // Words cycle in the morphing headline — swap out for any list
@@ -93,17 +174,15 @@ const getHomeData = async () => {
     },
 
     HelloMessage: {
-      quote:
-        "Streak.js is the missing link between a React component tree and a genuinely static website.",
+      quote: page.quote,
       author: "Streak.js Team",
-      bonusFact:
-        "At build time Streak serialises your data handler output, renders every React widget to an HTML string, and stitches it all into a complete page — no hydration, no client bundle.",
+      bonusFact: page.bonusFact,
     },
 
     HelloFooter: {
-      logoSrc: "/images/streak-logo.svg",
-      logoAlt: "Streak.js",
-      tagline: "The React static site generator.",
+      logoSrc: common?.branding?.logoSrc ?? "/images/streak-logo.svg",
+      logoAlt: common?.branding?.logoAlt ?? "Streak.js",
+      tagline: common?.branding?.tagline ?? "The React static site generator.",
       year: new Date().getFullYear(),
     },
   };

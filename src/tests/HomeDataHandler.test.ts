@@ -50,12 +50,6 @@ describe("HomeDataHandler — PageHead", () => {
   test("has a non-empty description", () => {
     expect(data.PageHead.description).toBeTruthy();
   });
-
-  test("heroImageUrl is a string when present", () => {
-    if (data.PageHead.heroImageUrl !== undefined) {
-      expect(typeof data.PageHead.heroImageUrl).toBe("string");
-    }
-  });
 });
 
 // ─── HelloNav ─────────────────────────────────────────────────────────────────
@@ -69,6 +63,11 @@ describe("HomeDataHandler — HelloNav", () => {
       expect(link.label).toBeTruthy();
       expect(link.href).toBeTruthy();
     }
+  });
+
+  test("streakCount is a positive integer", () => {
+    expect(data.HelloNav.streakCount).toBeGreaterThan(0);
+    expect(Number.isInteger(data.HelloNav.streakCount)).toBe(true);
   });
 });
 
@@ -117,35 +116,53 @@ describe("HomeDataHandler — HelloFeatures", () => {
 
 // ─── HelloAnimated ───────────────────────────────────────────────────────────
 describe("HomeDataHandler — HelloAnimated", () => {
-  test("has a heading", () => {
-    expect(data.HelloAnimated.heading).toBeTruthy();
-  });
-
-  test("particleCount is a positive integer", () => {
-    expect(data.HelloAnimated.particleCount).toBeGreaterThan(0);
-    expect(Number.isInteger(data.HelloAnimated.particleCount)).toBe(true);
-  });
-
   test("animationDuration is between 0 and 5 seconds", () => {
     expect(data.HelloAnimated.animationDuration).toBeGreaterThan(0);
     expect(data.HelloAnimated.animationDuration).toBeLessThanOrEqual(5);
   });
 
-  test("has at least one stat", () => {
-    expect(data.HelloAnimated.stats.length).toBeGreaterThan(0);
-  });
-
-  test("every stat has id, value (number), and label", () => {
-    for (const stat of data.HelloAnimated.stats) {
-      expect(stat.id).toBeTruthy();
-      expect(typeof stat.value).toBe("number");
-      expect(stat.label).toBeTruthy();
+  test("has at least one word for the morphing headline", () => {
+    expect(data.HelloAnimated.words.length).toBeGreaterThan(0);
+    for (const word of data.HelloAnimated.words) {
+      expect(typeof word).toBe("string");
+      expect(word.length).toBeGreaterThan(0);
     }
   });
 
-  test("stat ids are unique", () => {
-    const ids = data.HelloAnimated.stats.map((s) => s.id);
+  test("has at least one card", () => {
+    expect(data.HelloAnimated.cards.length).toBeGreaterThan(0);
+  });
+
+  test("every card has id, icon, title, and description", () => {
+    for (const card of data.HelloAnimated.cards) {
+      expect(card.id).toBeTruthy();
+      expect(card.icon).toBeTruthy();
+      expect(card.title).toBeTruthy();
+      expect(card.description).toBeTruthy();
+    }
+  });
+
+  test("card ids are unique", () => {
+    const ids = data.HelloAnimated.cards.map((c) => c.id);
     expect(new Set(ids).size).toBe(ids.length);
+  });
+});
+
+// ─── HelloTerminal ────────────────────────────────────────────────────────────
+describe("HomeDataHandler — HelloTerminal", () => {
+  test("has a promptLabel", () => {
+    expect(data.HelloTerminal.promptLabel).toBeTruthy();
+  });
+
+  test("has at least one line", () => {
+    expect(data.HelloTerminal.lines.length).toBeGreaterThan(0);
+    for (const line of data.HelloTerminal.lines) {
+      expect(typeof line).toBe("string");
+    }
+  });
+
+  test("typeSpeedMs is a positive number", () => {
+    expect(data.HelloTerminal.typeSpeedMs).toBeGreaterThan(0);
   });
 });
 
@@ -172,5 +189,52 @@ describe("HomeDataHandler — HelloFooter", () => {
 
   test("logoSrc is a string", () => {
     expect(typeof data.HelloFooter.logoSrc).toBe("string");
+  });
+});
+
+// ─── Per-page content (metadata.pageName) ──────────────────────────────────────
+// The handler is shared across all 3 sitemap pages ("/", "/docs", "/about")
+// - this proves metadata.pageName actually drives distinct content instead
+// of every page silently rendering the same thing.
+describe("HomeDataHandler — per-page content", () => {
+  test("home (no metadata) uses the default 'home' content", async () => {
+    const home = await getHomeData();
+    expect(home.PageHead.title).toBe("Hello Streak — Minimal Starter");
+    expect(home.HelloBanner.heading).toBe("Hello, World.");
+  });
+
+  test("docs and about pages render distinct heading/title/quote from home", async () => {
+    const home = await getHomeData({ pageName: "home" });
+    const docs = await getHomeData({ pageName: "docs" });
+    const about = await getHomeData({ pageName: "about" });
+
+    const pages = [home, docs, about];
+    for (const page of pages) {
+      expect(page.PageHead.title).toBeTruthy();
+      expect(page.HelloBanner.heading).toBeTruthy();
+      expect(page.HelloMessage.quote).toBeTruthy();
+    }
+
+    const titles = pages.map((p) => p.PageHead.title);
+    const headings = pages.map((p) => p.HelloBanner.heading);
+    const quotes = pages.map((p) => p.HelloMessage.quote);
+
+    expect(new Set(titles).size).toBe(pages.length);
+    expect(new Set(headings).size).toBe(pages.length);
+    expect(new Set(quotes).size).toBe(pages.length);
+  });
+
+  test("an unrecognized pageName falls back to home content", async () => {
+    const fallback = await getHomeData({ pageName: "does-not-exist" });
+    const home = await getHomeData({ pageName: "home" });
+    expect(fallback.PageHead.title).toBe(home.PageHead.title);
+    expect(fallback.HelloBanner.heading).toBe(home.HelloBanner.heading);
+  });
+
+  test("shared/structural widgets (HelloFeatures, HelloTerminal) stay the same across pages", async () => {
+    const home = await getHomeData({ pageName: "home" });
+    const docs = await getHomeData({ pageName: "docs" });
+    expect(docs.HelloFeatures.heading).toBe(home.HelloFeatures.heading);
+    expect(docs.HelloTerminal.lines).toEqual(home.HelloTerminal.lines);
   });
 });

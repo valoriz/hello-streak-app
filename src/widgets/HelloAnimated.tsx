@@ -1,4 +1,4 @@
-import { Script } from "streak/components";
+import { Script } from "streak-forge/components";
 
 type Card = { id: string; icon: string; title: string; description: string };
 
