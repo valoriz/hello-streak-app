@@ -21,7 +21,7 @@
     "e": "streak-forge dev-build"
   },
   "dependencies": {
-    "streak-forge": "latest"
+    "streak-forge": "^4.1.6-beta.0"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^8.0.0",
