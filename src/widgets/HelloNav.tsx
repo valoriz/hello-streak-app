@@ -1,4 +1,4 @@
-import { Dynamic, Script } from "streak-forge/components";
+import { Dynamic, Script, type GDom } from "streak-forge/components";
 
 type NavLink = { label: string; href: string };
 
@@ -113,7 +113,7 @@ const HelloNav = (props: HelloNavProps) => {
       </Dynamic>
 
       <Script id="hello-nav-script" options={{ streakCount }}>
-        {(gDom: any, options: any) => {
+        {(gDom: GDom, options: { streakCount: number }) => {
           const nav = document.getElementById("site-nav");
           if (!nav) return;
 

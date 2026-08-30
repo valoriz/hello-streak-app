@@ -1,4 +1,4 @@
-import { Dynamic, Script } from "streak-forge/components";
+import { Dynamic, Script, type GDom } from "streak-forge/components";
 
 type HelloMessageProps = {
   data?: {
@@ -80,7 +80,7 @@ const HelloMessage = (props: HelloMessageProps) => {
         </Dynamic>
 
         <Script id="hello-message-script">
-          {(gDom: any) => {
+          {(gDom: GDom) => {
             const section = document.getElementById("hello-message");
             const glow = document.getElementById("message-cursor-glow");
             if (section && glow) {
