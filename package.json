@@ -22,7 +22,7 @@
     "e": "streak-forge dev-build"
   },
   "dependencies": {
-    "streak-forge": "^4.1.7-beta.0"
+    "streak-forge": "beta"
   },
   "devDependencies": {
     "@types/bun": "^1.4.0",
