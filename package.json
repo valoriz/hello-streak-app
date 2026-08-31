@@ -25,6 +25,7 @@
     "streak-forge": "^4.1.6-beta.0"
   },
   "devDependencies": {
+    "@types/bun": "^1.4.0",
     "@typescript-eslint/eslint-plugin": "^8.0.0",
     "@typescript-eslint/parser": "^8.0.0",
     "bun": "^1.2.21",
