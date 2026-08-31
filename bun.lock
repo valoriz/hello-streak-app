@@ -4,7 +4,7 @@
     "": {
       "name": "hello-streak-app",
       "dependencies": {
-        "streak-forge": "^4.1.6-beta.0",
+        "streak-forge": "^4.1.7-beta.0",
       },
       "devDependencies": {
         "@types/bun": "^1.4.0",
@@ -397,7 +397,7 @@
 
     "source-map-support": ["source-map-support@0.5.21", "", { "dependencies": { "buffer-from": "^1.0.0", "source-map": "^0.6.0" } }, "sha512-uBHU3L3czsIyYXKX88fdrGovxdSCoTGDRZ6SYXtSRxLZUzHg5P/66Ht6uoUlHu9EZod+inXhKo3qQgwXUT/y1w=="],
 
-    "streak-forge": ["streak-forge@4.1.6-beta.0", "", { "dependencies": { "chokidar": "^5.0.0", "dotenv": "^17.2.2", "node-html-parser": "^7.0.1", "terser": "^5.43.1", "typescript": "^5.9.3" }, "bin": { "streak-forge": "dist/cli/main.js" } }, "sha512-nfzpH0UMNPRZX/MHAuK0Ei21Ow7xE5dz8Jyd8U8boXQU2Yfji5cCZkD6d9pfoE99PpOq20ecCXLM6tNs0F/eLQ=="],
+    "streak-forge": ["streak-forge@4.1.7-beta.0", "", { "dependencies": { "chokidar": "^5.0.0", "dotenv": "^17.2.2", "node-html-parser": "^7.0.1", "terser": "^5.43.1", "typescript": "^5.9.3" }, "bin": { "streak-forge": "dist/cli/main.js" } }, "sha512-bPdkOLH2GPlCUItPYFCPCBOjvNP6YUSr2/fAv+01r1F0BN29n815aPK1RYwMFqtVR3CMcwQbRRzKM0Kg8ajVpw=="],
 
     "string-width": ["string-width@4.2.3", "", { "dependencies": { "emoji-regex": "^8.0.0", "is-fullwidth-code-point": "^3.0.0", "strip-ansi": "^6.0.1" } }, "sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g=="],
 
