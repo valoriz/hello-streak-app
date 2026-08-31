@@ -1,4 +1,4 @@
-import { Dynamic, Script } from "streak-forge/components";
+import { Dynamic, Script, type GDom } from "streak-forge/components";
 
 type Feature = {
   id: string;
@@ -112,7 +112,7 @@ const HelloFeatures = (props: HelloFeaturesProps) => {
         </div>
 
         <Script id="hello-features-script">
-          {(gDom: any) => {
+          {(gDom: GDom) => {
             const btn = document.getElementById("expand-features-btn");
             const arrow = document.getElementById("expand-arrow");
             if (!btn) return;

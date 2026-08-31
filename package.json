@@ -16,14 +16,16 @@
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc --noEmit",
     "validate": "bun run src/scripts/streak-validate.ts",
+    "verify": "bun install --frozen-lockfile && bun run lint && bun run typecheck && bun run build && bun run validate && bun run test",
     "test-render": "bun run src/scripts/test-render.ts",
     "d": "streak-forge build",
     "e": "streak-forge dev-build"
   },
   "dependencies": {
-    "streak-forge": "latest"
+    "streak-forge": "^4.1.7-beta.0"
   },
   "devDependencies": {
+    "@types/bun": "^1.4.0",
     "@typescript-eslint/eslint-plugin": "^8.0.0",
     "@typescript-eslint/parser": "^8.0.0",
     "bun": "^1.2.21",

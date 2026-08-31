@@ -1,4 +1,4 @@
-import { Preload, Script } from "streak-forge/components";
+import { Preload, Script, type GDom } from "streak-forge/components";
 
 type HelloBannerProps = {
   data?: {
@@ -116,7 +116,7 @@ const HelloBanner = (props: HelloBannerProps) => {
         bring server-side values into a browser-side Script function.
       */}
       <Script id="hello-banner-script" options={{ accentColor, animationMs }}>
-        {(gDom: any, options: any) => {
+        {(gDom: GDom, options: { accentColor: string; animationMs: number }) => {
           const section = document.getElementById("hello_banner");
           const cta = document.getElementById("hero-cta");
           const hint = document.getElementById("scroll-hint");

@@ -1,4 +1,4 @@
-import { Script } from "streak-forge/components";
+import { Script, type GDom } from "streak-forge/components";
 
 type HelloTerminalProps = {
   data?: {
@@ -67,7 +67,7 @@ const HelloTerminal = (props: HelloTerminalProps) => {
         via `options` — see CLAUDE.md's Script section.
       */}
       <Script id="hello-terminal-script" options={{ lines, typeSpeedMs }}>
-        {(gDom: any, options: any) => {
+        {(gDom: GDom, options: { lines: string[]; typeSpeedMs: number }) => {
           const scriptLines: string[] = options.lines ?? [];
           const speed: number = options.typeSpeedMs ?? 22;
 

@@ -1,4 +1,4 @@
-import { Script } from "streak-forge/components";
+import { Script, type GDom } from "streak-forge/components";
 
 type Card = { id: string; icon: string; title: string; description: string };
 
@@ -193,7 +193,7 @@ const HelloAnimated = (props: HelloAnimatedProps) => {
         id="hello-animated-script"
         options={{ animationDuration, words }}
       >
-        {(gDom: any, options: any) => {
+        {(gDom: GDom, options: { animationDuration: number; words: string[] }) => {
           gDom
             .loadPackage("js/motion.js")
             .then(() => {
