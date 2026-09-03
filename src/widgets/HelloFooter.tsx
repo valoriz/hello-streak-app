@@ -1,17 +1,16 @@
 type HelloFooterProps = {
-  data?: {
-    logoSrc?: string;
-    logoAlt?: string;
-    tagline?: string;
+  data?: Record<string, never>;
+  common?: {
+    branding?: { logoSrc?: string; logoAlt?: string; tagline?: string };
     year?: number;
   };
 };
 
 const HelloFooter = (props: HelloFooterProps) => {
-  const logoSrc = props?.data?.logoSrc ?? "/images/streak-logo.svg";
-  const logoAlt = props?.data?.logoAlt ?? "Streak.js";
-  const tagline = props?.data?.tagline ?? "The React static site generator.";
-  const year = props?.data?.year ?? new Date().getFullYear();
+  const logoSrc = props?.common?.branding?.logoSrc ?? "/images/streak-logo.svg";
+  const logoAlt = props?.common?.branding?.logoAlt ?? "Streak.js";
+  const tagline = props?.common?.branding?.tagline ?? "The React static site generator.";
+  const year = props?.common?.year ?? new Date().getFullYear();
 
   return (
     <footer

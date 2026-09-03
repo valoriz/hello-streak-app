@@ -67,8 +67,30 @@ const getHomeData = async (metadata?: Record<string, unknown>, { common }: { com
 
   const page = PAGE_CONTENT[isPageName(metadata?.pageName) ? metadata.pageName : "home"];
 
+  // Shared data available to every widget via props.common.
+  // Branding and nav live here so widgets don't need widget-specific
+  // keys just for site-wide values.
+  const branding = {
+    logoSrc: common?.branding?.logoSrc ?? "/images/streak-logo.svg",
+    logoAlt: common?.branding?.logoAlt ?? "Streak.js",
+    tagline: common?.branding?.tagline ?? "The React static site generator.",
+  };
+  const navLinks = common?.nav?.links ?? [
+    { label: "Home",   href: "/" },
+    { label: "Docs",   href: "/docs" },
+    { label: "About",  href: "/about" },
+    { label: "GitHub", href: "#" },
+  ];
+
   return {
     status: 200,
+
+    // common key — Streak passes this as props.common to every widget on the page.
+    common: {
+      branding,
+      nav: { links: navLinks },
+      year: new Date().getFullYear(),
+    },
 
     PageHead: {
       title: page.pageTitle,
@@ -76,15 +98,7 @@ const getHomeData = async (metadata?: Record<string, unknown>, { common }: { com
     },
 
     HelloNav: {
-      logoSrc: common?.branding?.logoSrc ?? "/images/streak-logo.svg",
-      logoAlt: common?.branding?.logoAlt ?? "Streak.js",
-      links: common?.nav?.links ?? [
-        { label: "Home",   href: "/" },
-        { label: "Docs",   href: "/docs" },
-        { label: "About",  href: "/about" },
-        { label: "GitHub", href: "#" },
-      ],
-      // Playful nod to the project's own name — counts up on mount.
+      // Only widget-specific data stays here; branding/nav come via props.common.
       streakCount: 128,
     },
 
@@ -180,10 +194,7 @@ const getHomeData = async (metadata?: Record<string, unknown>, { common }: { com
     },
 
     HelloFooter: {
-      logoSrc: common?.branding?.logoSrc ?? "/images/streak-logo.svg",
-      logoAlt: common?.branding?.logoAlt ?? "Streak.js",
-      tagline: common?.branding?.tagline ?? "The React static site generator.",
-      year: new Date().getFullYear(),
+      // No widget-specific data — HelloFooter reads everything from props.common.
     },
   };
 };

@@ -4,17 +4,18 @@ type NavLink = { label: string; href: string };
 
 type HelloNavProps = {
   data?: {
-    logoSrc?: string;
-    logoAlt?: string;
-    links?: NavLink[];
     streakCount?: number;
+  };
+  common?: {
+    branding?: { logoSrc?: string; logoAlt?: string };
+    nav?: { links?: NavLink[] };
   };
 };
 
 const HelloNav = (props: HelloNavProps) => {
-  const logoSrc = props?.data?.logoSrc ?? "/images/streak-logo.svg";
-  const logoAlt = props?.data?.logoAlt ?? "Streak.js";
-  const links = props?.data?.links ?? [];
+  const logoSrc = props?.common?.branding?.logoSrc ?? "/images/streak-logo.svg";
+  const logoAlt = props?.common?.branding?.logoAlt ?? "Streak.js";
+  const links = props?.common?.nav?.links ?? [];
   const streakCount = props?.data?.streakCount ?? 0;
 
   return (

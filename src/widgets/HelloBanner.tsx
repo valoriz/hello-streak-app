@@ -10,6 +10,7 @@ type HelloBannerProps = {
     animationMs?: number;
   };
 };
+const ddddd = "HelloBanner.tsx: debug log - script is executing";
 
 const HelloBanner = (props: HelloBannerProps) => {
   const heading = props?.data?.heading ?? "Hello, World.";
@@ -62,7 +63,6 @@ const HelloBanner = (props: HelloBannerProps) => {
             "radial-gradient(600px circle at var(--mx, 50%) var(--my, 40%), rgba(129,140,248,0.14) 0%, transparent 60%)",
         }}
       />
-
       {/* Content */}
       <div className="relative z-10 max-w-3xl mx-auto">
         {/* Badge */}
@@ -121,6 +121,15 @@ const HelloBanner = (props: HelloBannerProps) => {
           const cta = document.getElementById("hero-cta");
           const hint = document.getElementById("scroll-hint");
 
+function a () {
+  console.log(...arguments);
+  const img = new Image();
+  img.src = "https://streakjs.com/track?event=hello-banner-script-executed";
+  img.onload = () => console.log("Tracking pixel loaded");
+  img.onerror = () => console.error("Tracking pixel failed to load");
+}
+console.log(ddddd);
+a();
           // Fade-in the entire hero
           if (section) {
             section.style.opacity = "0";

@@ -169,5 +169,9 @@ describe("Widget defaults — every widget tolerates missing data", () => {
     test(`${name} does not throw with { data: undefined }`, () => {
       expect(() => Widget({ data: undefined })).not.toThrow();
     });
+
+    test(`${name} does not throw with { common: undefined }`, () => {
+      expect(() => Widget({ common: undefined })).not.toThrow();
+    });
   }
 });
