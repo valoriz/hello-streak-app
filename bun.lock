@@ -397,7 +397,7 @@
 
     "source-map-support": ["source-map-support@0.5.21", "", { "dependencies": { "buffer-from": "^1.0.0", "source-map": "^0.6.0" } }, "sha512-uBHU3L3czsIyYXKX88fdrGovxdSCoTGDRZ6SYXtSRxLZUzHg5P/66Ht6uoUlHu9EZod+inXhKo3qQgwXUT/y1w=="],
 
-    "streak-forge": ["streak-forge@4.1.9-beta.0", "", { "dependencies": { "chokidar": "^5.0.0", "dotenv": "^17.2.2", "node-html-parser": "^7.0.1", "terser": "^5.43.1", "typescript": "^5.9.3" }, "bin": { "streak-forge": "dist/cli/main.js" } }, "sha512-38HEHQpWi5tgjRls4/4+db7rfvmRFeQBb5zPG7IEMh5A08zo/XbNWwS4F1OlvQ+J3ibduRsb/b042Vjg6HMUgA=="],
+    "streak-forge": ["streak-forge@4.1.11-beta.0", "", { "dependencies": { "chokidar": "^5.0.0", "dotenv": "^17.2.2", "node-html-parser": "^7.0.1", "terser": "^5.43.1", "typescript": "^5.9.3" }, "bin": { "streak-forge": "dist/cli/main.js" } }, "sha512-nuG7Acs95hOW3/n5RDbhs+CDhIj9yFw81+OGKMp1d4ji3hhcBOhYumtFud/bxb0ZkjkB2mUWnq9c4V85W+U4LA=="],
 
     "string-width": ["string-width@4.2.3", "", { "dependencies": { "emoji-regex": "^8.0.0", "is-fullwidth-code-point": "^3.0.0", "strip-ansi": "^6.0.1" } }, "sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g=="],
 

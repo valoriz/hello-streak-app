@@ -27,6 +27,7 @@ describe("HomeDataHandler — top-level shape", () => {
 
   test("contains all required widget keys", () => {
     const requiredKeys = [
+      "common",
       "PageHead",
       "HelloNav",
       "HelloBanner",
@@ -54,20 +55,15 @@ describe("HomeDataHandler — PageHead", () => {
 
 // ─── HelloNav ─────────────────────────────────────────────────────────────────
 describe("HomeDataHandler — HelloNav", () => {
-  test("has at least one nav link", () => {
-    expect(data.HelloNav.links.length).toBeGreaterThan(0);
-  });
-
-  test("every link has a label and href", () => {
-    for (const link of data.HelloNav.links) {
-      expect(link.label).toBeTruthy();
-      expect(link.href).toBeTruthy();
-    }
-  });
-
   test("streakCount is a positive integer", () => {
     expect(data.HelloNav.streakCount).toBeGreaterThan(0);
     expect(Number.isInteger(data.HelloNav.streakCount)).toBe(true);
+  });
+
+  test("nav links live in common (not HelloNav widget data)", () => {
+    expect((data.HelloNav as Record<string, unknown>).links).toBeUndefined();
+    expect(Array.isArray(data.common.nav.links)).toBe(true);
+    expect(data.common.nav.links.length).toBeGreaterThan(0);
   });
 });
 
@@ -183,12 +179,11 @@ describe("HomeDataHandler — HelloMessage", () => {
 
 // ─── HelloFooter ─────────────────────────────────────────────────────────────
 describe("HomeDataHandler — HelloFooter", () => {
-  test("year is the current year", () => {
-    expect(data.HelloFooter.year).toBe(new Date().getFullYear());
-  });
-
-  test("logoSrc is a string", () => {
-    expect(typeof data.HelloFooter.logoSrc).toBe("string");
+  test("branding and year live in common (not HelloFooter widget data)", () => {
+    expect((data.HelloFooter as Record<string, unknown>).year).toBeUndefined();
+    expect((data.HelloFooter as Record<string, unknown>).logoSrc).toBeUndefined();
+    expect(data.common.year).toBe(new Date().getFullYear());
+    expect(typeof data.common.branding.logoSrc).toBe("string");
   });
 });
 
