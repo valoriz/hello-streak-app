@@ -97,7 +97,7 @@ describe("HelloAnimated — Script options bridge (animationDuration / words)", 
 describe("HelloNav — Script options bridge (streakCount)", () => {
   test("options reflect the widget's actual data", () => {
     const streakCount = 42;
-    const vnode = HelloNav({ data: { streakCount, links: [] } });
+    const vnode = HelloNav({ data: { streakCount } });
     const navScript = collectByType(vnode, Script).find((s) => s.props.id === "hello-nav-script");
 
     expect(navScript).toBeDefined();
