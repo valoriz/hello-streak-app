@@ -124,13 +124,22 @@ describe("HelloTerminal — Script options bridge (lines / typeSpeedMs)", () => 
   });
 });
 
-// ─── Script inside Dynamic — options bridge regression test ───────────────────
-// Regression: streak-distiller's finalizePage fell through to its minify-
+// ─── Script inside Dynamic — options bridge + SPA re-navigation regressions ───
+// Regression 1: streak-distiller's finalizePage fell through to its minify-
 // fallback path for dynamic-component scripts (because hasContent=true when
 // assembling the component JS). That path used script.content raw without
 // substituting __SF_OPTS__ → ReferenceError in the browser.
 // These tests verify the VNode shape is correct so the pipeline has the right
 // data to perform the substitution.
+//
+// Regression 2: on SPA re-navigation, loadDynamicComponent called
+// addResourceToBody with the same content.js URL (qv frozen in index.json), which
+// addResourceToBody's loadedResources cache treated as already-done — script never
+// re-executed, panel stayed as placeholder. Fixed in loadDynamicComponent by
+// evicting the loadedResources entry before each call (same pattern as common.js).
+// The VNode-level tests below remain valid: the widget produces the correct
+// data-sf-opts on every render, so each SPA visit supplies fresh optsData for
+// the content.js that loadDynamicComponent now correctly re-fetches.
 describe("HelloDynamicScript — Script options inside Dynamic", () => {
   test("widget renders without throwing", () => {
     expect(() => HelloDynamicScript({ data: { label: "Test label", count: 7 } })).not.toThrow();

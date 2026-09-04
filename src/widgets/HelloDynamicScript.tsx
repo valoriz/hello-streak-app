@@ -2,16 +2,26 @@ import { Dynamic, Script, type GDom } from "streak-forge/components";
 
 /**
  * Demonstrates a <Script options={...}> nested inside a <Dynamic> block.
+ * Covers two regressions in this combination:
  *
- * This combination used to produce a ReferenceError in the browser:
- *   "Uncaught ReferenceError: __SF_OPTS__ is not defined"
+ * Regression 1 — __SF_OPTS__ ReferenceError on first load:
+ *   streak-distiller's finalizePage fell through to its minify-fallback path
+ *   when assembling dynamic-component JS (because `hasContent` is always true).
+ *   That path used `script.content` raw without substituting the __SF_OPTS__
+ *   placeholder with `script.optsData` → ReferenceError in the browser.
+ *   Fixed in finalizePage/index.ts — fallback path now applies the same
+ *   optsData substitution as the fast path.
  *
- * Root cause: streak-distiller's finalizePage fell through to its minify-
- * fallback path when assembling dynamic-component JS (because `hasContent`
- * is always true for dynamic components). That path used `script.content`
- * raw and never substituted the __SF_OPTS__ placeholder with `script.optsData`.
- * Fixed in finalizePage/index.ts — the fallback path now applies the same
- * optsData substitution as the fast path.
+ * Regression 2 — dynamic panel silent no-op on SPA re-navigation:
+ *   After navigating away and back via the SPA router, clicking "Load panel"
+ *   appeared to do nothing. Root cause: loadDynamicComponent called
+ *   addResourceToBody with the same content.js URL as the first visit (qv is
+ *   frozen at render time in index.json, so the URL is always identical).
+ *   addResourceToBody deduplicates by URL via loadedResources — it saw the URL
+ *   as already-done and returned immediately without re-executing the script.
+ *   Fixed in prepareForSiteOnlyOnce/index.ts — loadDynamicComponent now deletes
+ *   the loadedResources entry before calling addResourceToBody, mirroring the
+ *   same pattern hydratePage already uses for common.js.
  */
 
 type HelloDynamicScriptProps = {
