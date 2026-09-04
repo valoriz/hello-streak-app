@@ -18,6 +18,7 @@ import HelloBanner from "../widgets/HelloBanner";
 import HelloAnimated from "../widgets/HelloAnimated";
 import HelloNav from "../widgets/HelloNav";
 import HelloTerminal from "../widgets/HelloTerminal";
+import HelloDynamicScript from "../widgets/HelloDynamicScript";
 
 type VNode = { type: unknown; props: Record<string, any> };
 
@@ -120,6 +121,76 @@ describe("HelloTerminal — Script options bridge (lines / typeSpeedMs)", () => 
 
     const rendered = Script(termScript!.props as Parameters<typeof Script>[0]) as VNode;
     expect(rendered.props["data-sf-opts"]).toBe(JSON.stringify({ lines, typeSpeedMs }));
+  });
+});
+
+// ─── Script inside Dynamic — options bridge regression test ───────────────────
+// Regression: streak-distiller's finalizePage fell through to its minify-
+// fallback path for dynamic-component scripts (because hasContent=true when
+// assembling the component JS). That path used script.content raw without
+// substituting __SF_OPTS__ → ReferenceError in the browser.
+// These tests verify the VNode shape is correct so the pipeline has the right
+// data to perform the substitution.
+describe("HelloDynamicScript — Script options inside Dynamic", () => {
+  test("widget renders without throwing", () => {
+    expect(() => HelloDynamicScript({ data: { label: "Test label", count: 7 } })).not.toThrow();
+  });
+
+  test("script inside Dynamic carries options on data-sf-opts", () => {
+    const label = "Hello from server";
+    const count = 42;
+    const vnode = HelloDynamicScript({ data: { label, count } });
+
+    // Find the Script inside the Dynamic — must carry the server values.
+    const panelScript = collectByType(vnode, Script).find(
+      (s) => s.props.id === "dynamic-script-panel-script"
+    );
+
+    expect(panelScript).toBeDefined();
+    expect(panelScript!.props.options).toEqual({ label, count });
+
+    const rendered = Script(panelScript!.props as Parameters<typeof Script>[0]) as VNode;
+    expect(rendered.props["data-sf-opts"]).toBe(JSON.stringify({ label, count }));
+  });
+
+  test("data-sf-opts on inner Script differs from outer trigger Script (no options)", () => {
+    const vnode = HelloDynamicScript({ data: { label: "X", count: 1 } });
+
+    const triggerScript = collectByType(vnode, Script).find(
+      (s) => s.props.id === "dynamic-script-trigger"
+    );
+    // Outer trigger has no options — must default to '{}'
+    expect(triggerScript).toBeDefined();
+    const renderedTrigger = Script(triggerScript!.props as Parameters<typeof Script>[0]) as VNode;
+    expect(renderedTrigger.props["data-sf-opts"]).toBe("{}");
+  });
+
+  test("data-sf-opts contains the actual server values, not defaults", () => {
+    const label = "Custom label";
+    const count = 99;
+    const vnode = HelloDynamicScript({ data: { label, count } });
+
+    const panelScript = collectByType(vnode, Script).find(
+      (s) => s.props.id === "dynamic-script-panel-script"
+    );
+    const rendered = Script(panelScript!.props as Parameters<typeof Script>[0]) as VNode;
+    const opts = JSON.parse(rendered.props["data-sf-opts"]);
+
+    expect(opts.label).toBe(label);
+    expect(opts.count).toBe(count);
+  });
+
+  test("Dynamic node wraps the Script node", () => {
+    const vnode = HelloDynamicScript({ data: { label: "L", count: 0 } });
+    const dynamics = collectByType(vnode, Dynamic);
+    const panelDynamic = dynamics.find((d) => d.props.id === "dynamic-script-panel");
+
+    expect(panelDynamic).toBeDefined();
+
+    // Script should be a descendant of the Dynamic node
+    const innerScripts = collectByType(panelDynamic, Script);
+    const found = innerScripts.find((s) => s.props.id === "dynamic-script-panel-script");
+    expect(found).toBeDefined();
   });
 });
 
