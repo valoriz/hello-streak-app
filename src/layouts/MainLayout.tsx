@@ -40,8 +40,9 @@ const MainLayout = () => {
         <WidgetPlaceholder id="HelloFeatures"  type="HelloFeatures"  />
         <WidgetPlaceholder id="HelloTerminal"  type="HelloTerminal"  />
         <WidgetPlaceholder id="HelloAnimated"  type="HelloAnimated"  />
-        <WidgetPlaceholder id="HelloMessage"   type="HelloMessage"   />
-        <WidgetPlaceholder id="HelloFooter"   type="HelloFooter"   />
+        <WidgetPlaceholder id="HelloMessage"       type="HelloMessage"       />
+        <WidgetPlaceholder id="HelloDynamicScript" type="HelloDynamicScript" />
+        <WidgetPlaceholder id="HelloFooter"        type="HelloFooter"        />
       </body>
     </html>
   );

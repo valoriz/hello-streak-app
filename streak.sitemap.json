@@ -43,6 +43,11 @@
           "loadingStrategy": "lazy"
         },
         {
+          "id": "HelloDynamicScript",
+          "type": "HelloDynamicScript",
+          "loadingStrategy": "lazy"
+        },
+        {
           "id": "HelloFooter",
           "type": "HelloFooter",
           "loadingStrategy": "lazy"
@@ -95,6 +100,11 @@
           "loadingStrategy": "lazy"
         },
         {
+          "id": "HelloDynamicScript",
+          "type": "HelloDynamicScript",
+          "loadingStrategy": "lazy"
+        },
+        {
           "id": "HelloFooter",
           "type": "HelloFooter",
           "loadingStrategy": "lazy"
@@ -144,6 +154,11 @@
         {
           "id": "HelloMessage",
           "type": "HelloMessage",
+          "loadingStrategy": "lazy"
+        },
+        {
+          "id": "HelloDynamicScript",
+          "type": "HelloDynamicScript",
           "loadingStrategy": "lazy"
         },
         {

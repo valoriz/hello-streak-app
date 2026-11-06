@@ -193,6 +193,11 @@ const getHomeData = async (metadata?: Record<string, unknown>, { common }: { com
       bonusFact: page.bonusFact,
     },
 
+    HelloDynamicScript: {
+      label: "Loaded from a Dynamic component — server value passed via Script options.",
+      count: 1,
+    },
+
     HelloFooter: {
       // No widget-specific data — HelloFooter reads everything from props.common.
     },
