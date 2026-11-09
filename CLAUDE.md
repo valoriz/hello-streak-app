@@ -13,7 +13,7 @@ to the browser by default.
 | Concern | Tool |
 |---|---|
 | Runtime / package manager | **Bun** |
-| Styling | **TailwindCSS v3** (compiled → `public/styles/tailwind.css`) |
+| Styling | **TailwindCSS v4** (compiled → `public/styles/tailwind.css`) |
 | Language | **TypeScript** strict mode |
 | Linting | **ESLint 9** flat config + inline Streak plugin (`eslint.config.js`) |
 | Testing | **bun:test** (Jest-compatible, zero extra packages) |
