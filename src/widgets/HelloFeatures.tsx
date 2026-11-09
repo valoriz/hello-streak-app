@@ -36,7 +36,7 @@ const HelloFeatures = (props: HelloFeaturesProps) => {
             <article
               key={feature.id}
               id={`feature-card-${feature.id}`}
-              className="group rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 bg-white"
+              className="group rounded-2xl overflow-hidden border border-gray-100 shadow-xs hover:shadow-xl transition-all duration-300 bg-white"
             >
               {/* Image */}
               <div className="relative overflow-hidden h-48">
@@ -48,7 +48,7 @@ const HelloFeatures = (props: HelloFeaturesProps) => {
                   width={600}
                   height={400}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+                <div className="absolute inset-0 bg-linear-to-t from-black/30 to-transparent" />
               </div>
 
               {/* Text */}

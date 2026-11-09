@@ -74,7 +74,7 @@ hello-streak-app/
 ├── streak.sitemap.json          # page registry — source of truth for all pages
 ├── package.json
 ├── tsconfig.json
-├── tailwind.config.js
+├── src/common/styles/input.css  (Tailwind v4 CSS-first config)
 ├── eslint.config.js             # ESLint 9 flat config + inline Streak plugin
 │
 ├── src/

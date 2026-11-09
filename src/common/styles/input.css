@@ -1,7 +1,17 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Tailwind v4 — CSS-first config. Scan only src/ (mirrors old v3 `content`). */
+@import "tailwindcss" source("../../");
 
-body {
-  font-family: sans-serif;
+/*
+  v3 compat: v4 buttons default to `cursor: default`.
+  Keep pointer cursor on interactive elements like v3.
+*/
+@layer base {
+  body {
+    font-family: sans-serif;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
 }
